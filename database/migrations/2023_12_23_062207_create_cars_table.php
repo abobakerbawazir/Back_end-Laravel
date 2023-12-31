@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('model');
-            $table->boolean('active');
+            $table->boolean('active')->default(false);
             $table->integer('price');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreignId('prand')->references('id')->on('prands')->onDelete('cascade');
+            $table->foreignId('prand_id')->references('id')->on('prands')->onDelete('cascade');
             $table->softDeletes();
 
             $table->timestamps();

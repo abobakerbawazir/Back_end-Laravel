@@ -91,11 +91,29 @@ class PrandController extends Controller
             return $this->success_response(data: $result);
         }
     }
+    function getPrandName(Request $request)
+    {
+        $name=$request->input('name');
+        $namePrand=Prand::where('name','=',$name)->get();
+        return $this->success_response(data: $namePrand);
+
+        // $result = Image_car_brand::with('cars')->get();
+        // return $this->success_response(data: $result);
+
+        //return ImageCarBrandResource::collection(Image_car_brand::all());
+    }
 
     function retImage()
     {
 
         return PrandResource::collection(Prand::all());
+    }
+    function retImageID(int $id)
+    {
+
+        $result = Prand::find($id);
+        return $this->success_response(data: $result);
+
     }
     function rules(Request $request)
     {

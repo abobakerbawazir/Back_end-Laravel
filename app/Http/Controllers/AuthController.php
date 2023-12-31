@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
@@ -20,11 +21,14 @@ class AuthController extends Controller
      */
     public function index()
     {
-        $result = User::with(['roles'])->get();
+        $result = User::with('roles')->get();
         // foreach($result as $role){
         //     $role->role_name=$result->roles()->first()->name;
         // }
-        return $this->success_response(data: $result);
+
+        // 'roles' => $this->roles->name
+        //return $this->success_response(data:$result);
+        return $this->success_response(data:UserResource::collection($result));
 
 
         //
@@ -37,10 +41,10 @@ class AuthController extends Controller
     {
         $validation = $this->rules($request);
         if ($validation->fails()) {
-            return $this->failed_response(data: $validation->errors(), code: 404);
+            return $this->failed_response(data: $validation->errors());
         }
         $result = User::create($request->all());
-        return $this->success_response(data: $result, code: 201);
+        return $this->success_response(data: $result);
         //
     }
 
@@ -51,6 +55,17 @@ class AuthController extends Controller
     {
 
         $result = User::find($id);
+        if (!is_null($result)) {
+            return $this->success_response(data: $result);
+        } else {
+            return $this->failed_response(message: "id is not found", code: 404);
+        }
+        //
+    }
+    public function showBranch(string $roles)
+    {
+
+        $result = User::find($roles)->roles->first()->name;
         if (!is_null($result)) {
             return $this->success_response(data: $result);
         } else {

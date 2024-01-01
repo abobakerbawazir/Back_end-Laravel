@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\CarResource;
 use App\Models\Car;
+use App\Models\Image_car_brand;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -22,6 +23,15 @@ class CarController extends Controller
         // $result = Car::with('image_car_brands')->get();
         // return $this->success_response(data: $result);
         //
+    }
+    function getCarWithUserAndPrand(Request $request)
+    {
+        $user_id=$request->input('user_id');
+        $prand_id=$request->input('prand_id');
+        $namePrand=Car::where('prand_id','=',$prand_id)->where('user_id','=',$user_id)->with('image_car_brands')->get();
+        //return $this->success_response(data: $namePrand);
+        return $this->success_response(data:CarResource::collection($namePrand));
+
     }
 
     /**
@@ -95,6 +105,21 @@ class CarController extends Controller
         }
         //
     }
+
+   public function addCarAndImage(Request $request){
+    $result = Car::create($request->all());
+        // return $this->success_response(data: $result);
+    if ($request->has('image_path')) {
+        $image = $request->file('image_path');
+        $image_name = time() . '_image.' . $image->getClientOriginalExtension();
+        $path = 'public/photo_upload/cars';
+        $stored_path = $image->storeAs($path, $image_name);
+        $request['url'] = $stored_path;
+        $resualimage = Image_car_brand::create(['car_id'=>$result->id,'url'=>$stored_path]);
+        return $this->success_response(data: [$result,$resualimage]);
+    }
+   }
+
     function rules(Request $request)
     {
         return Validator::make(

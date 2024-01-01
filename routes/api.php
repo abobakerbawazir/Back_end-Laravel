@@ -32,6 +32,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 });
 Route::group(["prefix" => "admin"], function () {
+
+    Route::get('viewAllBranchActive', [AuthController::class, "viewAllBranchActive"]);
     Route::get('index', [AuthController::class, "index"]);
     Route::delete('delete/{id}', [AuthController::class, "destroy"]);
     Route::post('store', [AuthController::class, "store"]);
@@ -46,7 +48,7 @@ Route::post('store', [AuthController::class, "store"]);
 Route::get('show/{id}', [AuthController::class, "show"]);
 Route::put('update/{id}', [AuthController::class, "update"]);
 Route::group(["prefix" => "prand"], function () {
-    
+
     Route::get('getPrandName', [PrandController::class, 'getPrandName']);
 
     Route::post('uploadImage', [PrandController::class, 'uploadImage']);
@@ -54,11 +56,13 @@ Route::group(["prefix" => "prand"], function () {
     Route::delete('delete/{id}', [PrandController::class, "destroy"]);
 });
 Route::group(["prefix" => "car"], function () {
+    Route::post('addCarAndImage', [CarController::class, 'addCarAndImage']);
     Route::post('store', [CarController::class, 'store']);
     Route::get('index', [CarController::class, 'index']);
+    Route::get('getCarWithUserAndPrand', [CarController::class, 'getCarWithUserAndPrand']);
 });
 Route::group(["prefix" => "image"], function () {
-    
+
     Route::get('getImageId', [ImageCarBrandController::class, 'getImageId']);
     Route::post('uploadImage', [ImageCarBrandController::class, 'uploadImage']);
     Route::get('retImage', [ImageCarBrandController::class, 'retImage']);

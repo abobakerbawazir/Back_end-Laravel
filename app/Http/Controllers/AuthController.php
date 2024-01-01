@@ -28,10 +28,15 @@ class AuthController extends Controller
 
         // 'roles' => $this->roles->name
         //return $this->success_response(data:$result);
-        return $this->success_response(data:UserResource::collection($result));
+        return $this->success_response(data: UserResource::collection($result));
 
 
         //
+    }
+    public function viewAllBranchActive()
+    {
+        $result = User::role('branch')->where('active', '=', 1)->get();
+        return $this->success_response(data: UserResource::collection($result));
     }
 
     /**
@@ -171,6 +176,6 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         $user->tokens()->delete();
-        return $this->success_response(data: ["Seccufully"]);
+        return $this->success_response(data: ["تم تسجيل الخروج بنجاح"]);
     }
 }

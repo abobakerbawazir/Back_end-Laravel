@@ -17,10 +17,10 @@ class CarController extends Controller
      */
     public function index()
     {
-        $result = Car::with('image_car_brands')->get();
+        $result = Car::get();
         
         return $this->success_response(data:CarResource::collection($result));
-        // $result = Car::with('image_car_brands')->get();
+        // $result = Car::select('name','model')->get();
         // return $this->success_response(data: $result);
         //
     }
@@ -28,7 +28,9 @@ class CarController extends Controller
     {
         $user_id=$request->input('user_id');
         $prand_id=$request->input('prand_id');
-        $namePrand=Car::where('prand_id','=',$prand_id)->where('user_id','=',$user_id)->with('image_car_brands')->get();
+        // $namePrand=Car::where('prand_id','=',$prand_id)->where('user_id','=',$user_id)->with('image_car_brands')->get();
+        $namePrand=Car::where('prand_id','=',$prand_id)->where('user_id','=',$user_id)->get();
+
         //return $this->success_response(data: $namePrand);
         return $this->success_response(data:CarResource::collection($namePrand));
 
@@ -84,8 +86,21 @@ class CarController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Car $car)
+    public function update(Request $request, int $id)
     {
+    
+        // $validation = $this->rules($request);
+        // if ($validation->fails()) {
+        //     return $this->failed_response(data: $validation->errors(), code: 404);
+        // }
+        $obj = Car::find($id);
+        if (!is_null($obj)) {
+            $result = tap($obj)->update($request->all());
+            return $this->success_response(data: $result);
+        } else {
+            return $this->failed_response(code: 404);
+        }
+    
         //
     }
 
@@ -109,8 +124,8 @@ class CarController extends Controller
    public function addCarAndImage(Request $request){
     $result = Car::create($request->all());
         // return $this->success_response(data: $result);
-    if ($request->has('image_path')) {
-        $image = $request->file('image_path');
+    if ($request->has('image_car_of_brands')) {
+        $image = $request->file('image_car_of_brands');
         $image_name = time() . '_image.' . $image->getClientOriginalExtension();
         $path = 'public/photo_upload/cars';
         $stored_path = $image->storeAs($path, $image_name);

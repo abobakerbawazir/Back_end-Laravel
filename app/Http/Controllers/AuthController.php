@@ -19,16 +19,37 @@ class AuthController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // public function index(){}
     public function index()
     {
-        $result = User::with('roles')->get();
-        // foreach($result as $role){
-        //     $role->role_name=$result->roles()->first()->name;
-        // }
+        // Booking::with('user')->whereHas('cars',function($query){ $query->where('cars.user_id',1);})->get()
+        // $users=User::with('bookings.cars')->get();
+        // return response()->json($users);
+        
+        // $users=User::with(['bookings'=>function($query){
+        //     $query->select('user_id','from');
+        // },'bookings.cars'=>function($query){
+        //     $query->select('name');
+        // }])->get();
+        //return response()->json($users);
 
-        // 'roles' => $this->roles->name
-        //return $this->success_response(data:$result);
+        // $users=User::with(['bookings.cars'=>function($query){
+        //     $query->select('name');
+        // }])->get();
+        //  return response()->json($users);
+
+        $result = User::with('roles')->get();
         return $this->success_response(data: UserResource::collection($result));
+        // // foreach($result as $role){
+        // //     $role->role_name=$result->roles()->first()->name;
+        // // }
+
+        // // 'roles' => $this->roles->name
+        // //return $this->success_response(data:$result);
+        // return $this->success_response(data: UserResource::collection($result));
+        // $result = User::with('bookings')->get();
+        // return $this->success_response(data: UserResource::collection($result));
+
 
 
         //
@@ -126,7 +147,7 @@ class AuthController extends Controller
             [
 
                 'username' => $signIn ? '' : ['required', 'unique:users', 'regex:/^[a-zA-Z ]+$/u'],
-                'email' => $signIn ? '' : ['required', $signIn ? '' : 'unique:users,email'],
+                'email' => $signIn ? '' : ['required', 'email', $signIn ? '' : 'unique:users,email'],
                 'phone' => $signIn ? '' : 'required|unique:users,phone|numeric|digits:9',
                 'password' => $signIn ? '' : ['required', $signIn ? '' : 'confirmed', 'min:8'],
                 'user_type' => $signIn ? '' : 'required',

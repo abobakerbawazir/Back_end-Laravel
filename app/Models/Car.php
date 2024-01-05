@@ -16,7 +16,20 @@ class Car extends Model
         "user_id",
         "prand_id"
     ];
-    public function image_car_brands(){
+    public function image_car_brands()
+    {
         return $this->hasMany(Image_car_brand::class);
+    }
+    // public function users()
+    // {
+    //     return $this->belongsToMany(User::class,'bookings')->withPivot(['from','to','total'])->withTimestamps();
+    // }
+    public function users()
+    {
+        return $this->belongsTo(User::class,'user_id');
+    }
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'car_id');
     }
 }

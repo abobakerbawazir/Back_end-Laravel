@@ -25,10 +25,33 @@ class User extends Authenticatable
         'full_name',
         'active',
         'user_type',
+        'image',
+        'location',
         'email',
         'password',
     ];
-
+    // public function cars()
+    // {
+    //     return $this->belongsToMany(Car::class,'bookings')->withPivot(['from','to','total'])->withTimestamps();
+    // }
+    public function usercars(){
+        return $this->hasMany(Car::class);
+    }
+    /**
+     * Get all of the comments for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+    function getUrlAttribute() {
+        return env('APP_URL').':8000/storage/'.substr($this->attributes['image'],7);
+    }
+    // public function booking(){
+    //     return $this->hasMany(Booking::class);
+    // }
     /**
      * The attributes that should be hidden for serialization.
      *

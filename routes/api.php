@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\ImageCarBrandController;
 use App\Http\Controllers\PrandController;
@@ -30,6 +31,39 @@ Route::post('signup', [AuthController::class, 'signup'])->name('signup');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+    ///////////////////////////////////////////////
+    Route::group(["prefix" => "booking"], function () {
+        Route::post('bookingCarsByUser_id_and_car_id_select_only_date_from_to/{userId}/{carId}', [BookingController::class, 'bookingCarsByUser_id_and_car_id_select_only_date_from_to']);
+    });
+    ///////////////////////////////////////////////////
+    // Route::group(["prefix" => "admin"], function () {
+
+    //     Route::get('viewAllBranchActive', [AuthController::class, "viewAllBranchActive"]);
+    //     Route::get('index', [AuthController::class, "index"]);
+    //     Route::delete('delete/{id}', [AuthController::class, "destroy"]);
+    //     Route::post('store', [AuthController::class, "store"]);
+    //     Route::get('show/{id}', [AuthController::class, "show"]);
+    //     Route::get('showBranch/{roles}', [AuthController::class, "showBranch"]);
+    
+    //     Route::put('update/{id}', [AuthController::class, "update"]);
+    // });
+    /////////////////////////////////////////////////////////
+    // Route::group(["prefix" => "car"], function () {
+    //     Route::post('addCarAndImage', [CarController::class, 'addCarAndImage']);
+    //     Route::post('store', [CarController::class, 'store']);
+    //     Route::get('index', [CarController::class, 'index']);
+    //     Route::put('update/{id}', [CarController::class, "update"]);
+    
+    //     Route::get('getCarWithUserAndPrand', [CarController::class, 'getCarWithUserAndPrand']);
+    // });
+    /////////////////////////////////////////////////////////////
+    // Route::group(["prefix" => "image"], function () {
+
+    //     Route::get('getImageId', [ImageCarBrandController::class, 'getImageId']);
+    //     Route::post('uploadImage', [ImageCarBrandController::class, 'uploadImage']);
+    //     Route::get('retImage', [ImageCarBrandController::class, 'retImage']);
+    //     Route::delete('delete/{id}', [ImageCarBrandController::class, "destroy"]);
+    // });
 });
 Route::group(["prefix" => "admin"], function () {
 
@@ -59,6 +93,8 @@ Route::group(["prefix" => "car"], function () {
     Route::post('addCarAndImage', [CarController::class, 'addCarAndImage']);
     Route::post('store', [CarController::class, 'store']);
     Route::get('index', [CarController::class, 'index']);
+    Route::put('update/{id}', [CarController::class, "update"]);
+
     Route::get('getCarWithUserAndPrand', [CarController::class, 'getCarWithUserAndPrand']);
 });
 Route::group(["prefix" => "image"], function () {
@@ -68,3 +104,21 @@ Route::group(["prefix" => "image"], function () {
     Route::get('retImage', [ImageCarBrandController::class, 'retImage']);
     Route::delete('delete/{id}', [ImageCarBrandController::class, "destroy"]);
 });
+Route::group(["prefix" => "booking"], function () {
+    Route::post('store', [BookingController::class, 'store']);
+    Route::get('index', [BookingController::class, 'index']);
+    Route::get('show/{id}', [BookingController::class, 'show']);
+    Route::put('update/{id}', [BookingController::class, 'update']);
+    Route::delete('delete/{id}', [BookingController::class, 'destroy']);
+    Route::get('bookingwithcaranduserbyId/{user_id}/{car_id}', [BookingController::class, 'bookingwithcaranduserbyId']);
+    Route::get('convertdays', [BookingController::class, 'convertdays']);
+    Route::get('bookingwithusersId/{user_id}', [BookingController::class, 'bookingwithusersId']);
+    Route::post('bookingcarsactive/{userId}/{carId}', [BookingController::class, 'bookingcarsactive']);
+    // Route::post('bookingCarsByUser_id_and_car_id_select_only_date_from_to/{userId}/{carId}', [BookingController::class, 'bookingCarsByUser_id_and_car_id_select_only_date_from_to']);
+
+
+
+});
+
+Route::get('/get_booking_by_branch/{id}',[BookingController::class,'getBookingByBranchId']);
+Route::get('/getBookingByBranchIdByCustomerIdForCoustomer/{branch_id}/{customer_id}',[BookingController::class,'getBookingByBranchIdByCustomerIdForCoustomer']);

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BookingResource;
+use App\Http\Resources\UserResource;
 use App\Models\Booking;
 use App\Models\Car;
 use App\Models\User;
@@ -44,12 +46,30 @@ class BookingController extends Controller
         })->get();
         return response()->json($booking, 200);
     }
+    public function getAllInformationBookingForAllCustomer()
+    {
+        $booking = Booking::with('cars.users')->with('cars.image_car_brands')->with('user')->get();
+        //$booking = Booking::find(294)->with('cars.users')->with('cars.image_car_brands')->with('user')->first();
+
+        return response()->json($booking, 200);
+    }
+    public function getByIDInformationBookingForAllCustomer(int $id)
+    {
+        $booking = Booking::where('id', $id)->with('cars.users:id,username')->with('cars.image_car_brands')->with('user')->first();
+        $booking->user->image =  $booking->user->image ?? "http://192.168.179.98:8000/storage/photo_upload/users/100.png";
+        // $result = [
+        //     'booking' => $booking,
+        //     'cars' =>  ,
+        //     'user' => 
+        // ];
+        return response()->json(new BookingResource($booking));
+    }
     public function getBookingByBranchId($branch_id)
     {
         //  $booking=Booking::with('cars')->with('user')->where('user_id',4)->
         //  whereHas('cars',function($query)use($branch_id){ $query->where('cars.user_id',$branch_id);})->get();
         // $branch_id=request()->user()->id;
-        $booking = Booking::with('cars')->with('user')->whereHas('cars', function ($query) use ($branch_id) {
+        $booking = Booking::with('cars.image_car_brands')->with('user')->whereHas('cars', function ($query) use ($branch_id) {
             $query->where('cars.user_id', $branch_id);
         })->get();
         // $booking=Booking::with('cars')
@@ -75,7 +95,7 @@ class BookingController extends Controller
         $result = Booking::all();
         //$result = Booking::where('user_id', 10)->where('car_id', 14)->first();
 
-        return $this->success_response(data: $result);
+        return $this->success_response(data: BookingResource::collection($result));
 
 
         //
@@ -257,6 +277,30 @@ class BookingController extends Controller
         }
         //
     }
+    public function updateBookingStateByBranch(Request $request, int $id)
+    {
+        $validation = $this->rulesstatus($request);
+        if ($validation->fails()) {
+            return $this->failed_response(data: $validation->errors(), code: 400);
+        }
+        $obj = Booking::find($id);
+        if (!is_null($obj)) {
+            $car = Car::findOrFail($obj->car_id);
+            if ($request->status == 'مؤكد') {
+                $car->active = true;
+            } elseif ($request->status == 'مكتمل') {
+                $car->active = false;
+            }
+            $car->save();
+            //$car->update(["active"=>$car->active]);
+            // $idcar=$car->id;
+            $result = tap($obj)->update([$obj->status = $request->status]);
+            return $this->success_response(data: [$result, $car,]);
+        } else {
+            return $this->failed_response(code: 400,);
+        }
+        //
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -282,6 +326,12 @@ class BookingController extends Controller
             'total' => 'required:bookings',
             'user_id' => 'required:bookings',
             'car_id' => 'required:bookings',
+            'status' => 'required|in:معلق,مؤكد,ملغى,مكتمل,مرفوض'
+        ]);
+    }
+    function rulesstatus(Request $request)
+    {
+        return Validator::make($request->all(), [
             'status' => 'required|in:معلق,مؤكد,ملغى,مكتمل,مرفوض'
         ]);
     }

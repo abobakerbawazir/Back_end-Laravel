@@ -44,7 +44,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //     Route::post('store', [AuthController::class, "store"]);
     //     Route::get('show/{id}', [AuthController::class, "show"]);
     //     Route::get('showBranch/{roles}', [AuthController::class, "showBranch"]);
-    
+
     //     Route::put('update/{id}', [AuthController::class, "update"]);
     // });
     /////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //     Route::post('store', [CarController::class, 'store']);
     //     Route::get('index', [CarController::class, 'index']);
     //     Route::put('update/{id}', [CarController::class, "update"]);
-    
+
     //     Route::get('getCarWithUserAndPrand', [CarController::class, 'getCarWithUserAndPrand']);
     // });
     /////////////////////////////////////////////////////////////
@@ -105,10 +105,16 @@ Route::group(["prefix" => "image"], function () {
     Route::delete('delete/{id}', [ImageCarBrandController::class, "destroy"]);
 });
 Route::group(["prefix" => "booking"], function () {
+    Route::get('getBookingByBranchId/{branch_id}', [BookingController::class, 'getBookingByBranchId']);
+    Route::get('getBookingByBranchIdByCustomerIdForCoustomer/{branch_id}/{customer_id}', [BookingController::class, 'getBookingByBranchIdByCustomerIdForCoustomer']);
+    Route::get('getAllInformationBookingForAllCustomer', [BookingController::class, 'getAllInformationBookingForAllCustomer']);
+    Route::get('getByIDInformationBookingForAllCustomer/{id}', [BookingController::class, 'getByIDInformationBookingForAllCustomer']);
     Route::post('store', [BookingController::class, 'store']);
     Route::get('index', [BookingController::class, 'index']);
     Route::get('show/{id}', [BookingController::class, 'show']);
     Route::put('update/{id}', [BookingController::class, 'update']);
+    Route::put('updateBookingStateByBranch/{id}', [BookingController::class, 'updateBookingStateByBranch']);
+
     Route::delete('delete/{id}', [BookingController::class, 'destroy']);
     Route::get('bookingwithcaranduserbyId/{user_id}/{car_id}', [BookingController::class, 'bookingwithcaranduserbyId']);
     Route::get('convertdays', [BookingController::class, 'convertdays']);
@@ -119,6 +125,3 @@ Route::group(["prefix" => "booking"], function () {
 
 
 });
-
-Route::get('/get_booking_by_branch/{id}',[BookingController::class,'getBookingByBranchId']);
-Route::get('/getBookingByBranchIdByCustomerIdForCoustomer/{branch_id}/{customer_id}',[BookingController::class,'getBookingByBranchIdByCustomerIdForCoustomer']);

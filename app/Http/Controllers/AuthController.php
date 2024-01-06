@@ -25,7 +25,7 @@ class AuthController extends Controller
         // Booking::with('user')->whereHas('cars',function($query){ $query->where('cars.user_id',1);})->get()
         // $users=User::with('bookings.cars')->get();
         // return response()->json($users);
-        
+
         // $users=User::with(['bookings'=>function($query){
         //     $query->select('user_id','from');
         // },'bookings.cars'=>function($query){
@@ -82,7 +82,7 @@ class AuthController extends Controller
 
         $result = User::find($id);
         if (!is_null($result)) {
-            return $this->success_response(data: $result);
+            return $this->success_response(data:new UserResource($result));
         } else {
             return $this->failed_response(message: "id is not found", code: 404);
         }
@@ -105,10 +105,10 @@ class AuthController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        // $validation = $this->rules($request);
-        // if ($validation->fails()) {
-        //     return $this->failed_response(data: $validation->errors(), code: 404);
-        // }
+        $validation = $this->rulesUpdate($request);
+        if ($validation->fails()) {
+            return $this->failed_response(data: $validation->errors(), code: 404);
+        }
         $obj = User::find($id);
         if (!is_null($obj)) {
             $result = tap($obj)->update($request->all());
@@ -152,6 +152,23 @@ class AuthController extends Controller
                 'password' => $signIn ? '' : ['required', $signIn ? '' : 'confirmed', 'min:8'],
                 'user_type' => $signIn ? '' : 'required',
                 'role' => $signIn ? '' : 'required|string'
+            ]
+
+        );
+    }
+    function rulesUpdate(Request $request)
+    {
+        // echo Route::currentRouteName();
+        $signIn = Route::currentRouteName() == 'login';
+
+        return Validator::make(
+            $request->all(),
+            [
+
+                'email' => $signIn ? '' : ['required', 'email', $signIn ? '' : 'unique:users,email'],
+                'phone' => $signIn ? '' : 'required|unique:users,phone|numeric|digits:9',
+                'password' => $signIn ? '' : ['required', $signIn ? '' : 'confirmed', 'min:8'],
+               
             ]
 
         );

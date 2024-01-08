@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\Booking2Resource;
 use App\Http\Resources\BookingResource;
 use App\Http\Resources\UserResource;
 use App\Models\Booking;
@@ -53,9 +54,18 @@ class BookingController extends Controller
 
         return response()->json($booking, 200);
     }
+    public function getAllInformationBookingForOnlyCustomer(int $user_id)
+    {
+        $booking = Booking::where('user_id', $user_id)->with('cars.users')->with('cars.image_car_brands')->with('user')->get();
+        // foreach($booking as $booking){
+        //     $booking->user->image =  $booking->user->image ?? "http://192.168.179.98:8000/storage/photo_upload/users/100.png";
+
+        // }
+        return response()->json(BookingResource::collection($booking));
+    }
     public function getByIDInformationBookingForAllCustomer(int $id)
     {
-        $booking = Booking::where('id', $id)->with('cars.users:id,username')->with('cars.image_car_brands')->with('user')->first();
+        $booking = Booking::where('id', $id)->with('cars.users')->with('cars.image_car_brands')->with('user')->first();
         $booking->user->image =  $booking->user->image ?? "http://192.168.179.98:8000/storage/photo_upload/users/100.png";
         // $result = [
         //     'booking' => $booking,
@@ -72,13 +82,17 @@ class BookingController extends Controller
         $booking = Booking::with('cars.image_car_brands')->with('user')->whereHas('cars', function ($query) use ($branch_id) {
             $query->where('cars.user_id', $branch_id);
         })->get();
+        //  $booking->user->image = 
+        //   $booking->user->image ?? "http://192.168.179.98:8000/storage/photo_upload/users/100.png";
+
         // $booking=Booking::with('cars')
         // ->whereHas('cars.users',function($query)use($branch_id)
         // {
         //     return $query->where('user_id',$branch_id);
         // })
         // ->get();
-        return response()->json($booking, 200);
+        return response()->json(Booking2Resource::collection($booking), 200);
+
         // return response()->json($branch_id,200);
     }
     public function index()

@@ -89,10 +89,10 @@ class CarController extends Controller
     public function update(Request $request, int $id)
     {
     
-        // $validation = $this->rules($request);
-        // if ($validation->fails()) {
-        //     return $this->failed_response(data: $validation->errors(), code: 404);
-        // }
+        $validation = $this->rules($request);
+        if ($validation->fails()) {
+            return $this->failed_response(data: $validation->errors(), code: 404);
+        }
         $obj = Car::find($id);
         if (!is_null($obj)) {
             $result = tap($obj)->update($request->all());

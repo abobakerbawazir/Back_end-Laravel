@@ -66,14 +66,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // });
 });
 Route::group(["prefix" => "admin"], function () {
-
     Route::get('viewAllBranchActive', [AuthController::class, "viewAllBranchActive"]);
     Route::get('index', [AuthController::class, "index"]);
     Route::delete('delete/{id}', [AuthController::class, "destroy"]);
     Route::post('store', [AuthController::class, "store"]);
     Route::get('show/{id}', [AuthController::class, "show"]);
     Route::get('showBranch/{roles}', [AuthController::class, "showBranch"]);
-
     Route::put('update/{id}', [AuthController::class, "update"]);
 });
 Route::get('index', [AuthController::class, "index"]);
@@ -82,9 +80,7 @@ Route::post('store', [AuthController::class, "store"]);
 Route::get('show/{id}', [AuthController::class, "show"]);
 Route::put('update/{id}', [AuthController::class, "update"]);
 Route::group(["prefix" => "prand"], function () {
-
     Route::get('getPrandName', [PrandController::class, 'getPrandName']);
-
     Route::post('uploadImage', [PrandController::class, 'uploadImage']);
     Route::get('retImage', [PrandController::class, 'retImage']);
     Route::delete('delete/{id}', [PrandController::class, "destroy"]);
@@ -94,17 +90,18 @@ Route::group(["prefix" => "car"], function () {
     Route::post('store', [CarController::class, 'store']);
     Route::get('index', [CarController::class, 'index']);
     Route::put('update/{id}', [CarController::class, "update"]);
-
+    Route::delete('delete/{id}', [CarController::class, "destroy"]);
+    Route::get('show/{id}', [CarController::class, "show"]);
     Route::get('getCarWithUserAndPrand', [CarController::class, 'getCarWithUserAndPrand']);
 });
 Route::group(["prefix" => "image"], function () {
-
     Route::get('getImageId', [ImageCarBrandController::class, 'getImageId']);
     Route::post('uploadImage', [ImageCarBrandController::class, 'uploadImage']);
     Route::get('retImage', [ImageCarBrandController::class, 'retImage']);
     Route::delete('delete/{id}', [ImageCarBrandController::class, "destroy"]);
 });
 Route::group(["prefix" => "booking"], function () {
+    Route::get('getAllInformationBookingForOnlyCustomer/{user_id}', [BookingController::class, 'getAllInformationBookingForOnlyCustomer']);
     Route::get('getBookingByBranchId/{branch_id}', [BookingController::class, 'getBookingByBranchId']);
     Route::get('getBookingByBranchIdByCustomerIdForCoustomer/{branch_id}/{customer_id}', [BookingController::class, 'getBookingByBranchIdByCustomerIdForCoustomer']);
     Route::get('getAllInformationBookingForAllCustomer', [BookingController::class, 'getAllInformationBookingForAllCustomer']);
@@ -114,7 +111,6 @@ Route::group(["prefix" => "booking"], function () {
     Route::get('show/{id}', [BookingController::class, 'show']);
     Route::put('update/{id}', [BookingController::class, 'update']);
     Route::put('updateBookingStateByBranch/{id}', [BookingController::class, 'updateBookingStateByBranch']);
-
     Route::delete('delete/{id}', [BookingController::class, 'destroy']);
     Route::get('bookingwithcaranduserbyId/{user_id}/{car_id}', [BookingController::class, 'bookingwithcaranduserbyId']);
     Route::get('convertdays', [BookingController::class, 'convertdays']);

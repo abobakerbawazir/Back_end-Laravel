@@ -98,6 +98,17 @@ class PrandController extends Controller
             return $this->success_response(data: $result);
         }
     }
+    public function filtterPrandName(Request $request){
+        $name=$request->input('name');
+      
+        $result=Prand::query();
+     
+        if($name){
+            $result->where('name','LIKE','%'.$name.'%');
+        }
+        $filteredResult=$result->get();
+        return $this->success_response(data: PrandResource::collection($filteredResult));
+    }
     function getPrandName(Request $request)
     {
         $name=$request->input('name');

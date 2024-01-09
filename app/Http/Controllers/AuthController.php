@@ -54,6 +54,25 @@ class AuthController extends Controller
 
         //
     }
+    public function fltterUser(Request $request){
+        $username=$request->input('username');
+        $email=$request->input('email');
+        $roles=$request->input('roles');
+        $result=User::query();
+        //$r=Role::all();
+        //$x=Role::all();
+        if($username){
+            $result->where('username','LIKE','%'.$username.'%');
+        }
+        if($email){
+            $result->where('email','LIKE','%'. $email .'%');
+        }
+        // if($roles){
+        //     $result->where('roles','LIKE','%'. $roles .'%');
+        // }
+        $filteredResult=$result->get();
+        return $this->success_response(data: UserResource::collection($filteredResult));
+    }
     public function viewAllBranchActive()
     {
          $result = User::role('branch')->where('active', '=', 1)->get();

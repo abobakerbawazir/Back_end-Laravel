@@ -69,6 +69,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // });
 });
 Route::group(["prefix" => "admin"], function () {
+    Route::get('fltterUser', [AuthController::class, "fltterUser"]);
     Route::get('viewAlluserByRoleName/{name}/{id}', [AuthController::class, "viewAlluserByRoleName"]);
     Route::get('viewAllBranchActive', [AuthController::class, "viewAllBranchActive"]);
     Route::get('viewAlluserDoesNotAdmin', [AuthController::class, "viewAlluserDoesNotAdmin"]);
@@ -85,6 +86,8 @@ Route::post('store', [AuthController::class, "store"]);
 Route::get('show/{id}', [AuthController::class, "show"]);
 Route::put('update/{id}', [AuthController::class, "update"]);
 Route::group(["prefix" => "prand"], function () {
+    Route::get('filtterPrandName', [PrandController::class, 'filtterPrandName']);
+
     Route::get('getPrandName', [PrandController::class, 'getPrandName']);
     Route::post('uploadImage', [PrandController::class, 'uploadImage']);
     Route::get('retImage', [PrandController::class, 'retImage']);
@@ -139,5 +142,7 @@ Route::group(["prefix" => 'transaction_history'], function () {
     Route::get('index', [TransactionHistoryController::class, 'index']);
     Route::post('transfer', [TransactionHistoryController::class, 'transfer']);
     Route::post('diposit', [TransactionHistoryController::class, 'diposit']);
-    Route::post('withfdraw', [TransactionHistoryController::class, 'withfdraw']);
+    Route::post('withdraw', [TransactionHistoryController::class, 'withdraw']);
+    Route::get('checkbooking', [TransactionHistoryController::class, 'checkbooking']);
+    
 });

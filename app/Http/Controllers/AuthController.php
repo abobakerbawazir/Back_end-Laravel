@@ -56,7 +56,23 @@ class AuthController extends Controller
     }
     public function viewAllBranchActive()
     {
-        $result = User::role('branch')->where('active', '=', 1)->get();
+         $result = User::role('branch')->where('active', '=', 1)->get();
+        // $result = User::whereDoesntHave('roles',function($query){
+        //     $query->where('name','admin');
+        // })->get();
+        return $this->success_response(data: UserResource::collection($result));
+    }
+    public function viewAlluserDoesNotAdmin()
+    {
+        $result = User::whereDoesntHave('roles',function($query){
+            $query->where('name','admin');
+        })->get();
+        return $this->success_response(data: UserResource::collection($result));
+    }
+    public function viewAlluserByRoleName(String $name,int $id)
+    {
+        //$result = User::role('branch')->where('active', '=', 1)->get();
+        $result = User::role($name)->where('active', '=', $id)->get();
         return $this->success_response(data: UserResource::collection($result));
     }
 
@@ -105,10 +121,10 @@ class AuthController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $validation = $this->rulesUpdate($request);
-        if ($validation->fails()) {
-            return $this->failed_response(data: $validation->errors(), code: 404);
-        }
+        // $validation = $this->rulesUpdate($request);
+        // if ($validation->fails()) {
+        //     return $this->failed_response(data: $validation->errors(), code: 404);
+        // }
         $obj = User::find($id);
         if (!is_null($obj)) {
             $result = tap($obj)->update($request->all());
@@ -191,8 +207,8 @@ class AuthController extends Controller
         }
 
         $user->token = $user->createToken('api_token')->plainTextToken;
-        $user->role = $user->roles()->first()->name;
-        return $this->success_response(data: $user);
+        //$user->role = $user->roles()->first()->name;
+        return $this->success_response(data:new UserResource($user));
     }
 
     function signup(Request $request)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\PrandResource;
 use App\Models\Prand;
+use App\Models\Transaction_type;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -32,6 +33,12 @@ class PrandController extends Controller
      */
     public function store(Request $request)
     {
+        $validation = $this->rules($request);
+        if ($validation->fails()) {
+            return $this->failed_response(data: $validation->errors());
+        }
+        $result = Transaction_type::create($request->all());
+        return $this->success_response(data: $result);
         //
     }
 

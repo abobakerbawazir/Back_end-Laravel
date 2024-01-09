@@ -5,6 +5,9 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\ImageCarBrandController;
 use App\Http\Controllers\PrandController;
+use App\Http\Controllers\TransactionHistoryController;
+use App\Http\Controllers\TransactionTypeController;
+use App\Http\Controllers\WalletController;
 use App\Models\Prand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -66,7 +69,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // });
 });
 Route::group(["prefix" => "admin"], function () {
+    Route::get('viewAlluserByRoleName/{name}/{id}', [AuthController::class, "viewAlluserByRoleName"]);
     Route::get('viewAllBranchActive', [AuthController::class, "viewAllBranchActive"]);
+    Route::get('viewAlluserDoesNotAdmin', [AuthController::class, "viewAlluserDoesNotAdmin"]);
     Route::get('index', [AuthController::class, "index"]);
     Route::delete('delete/{id}', [AuthController::class, "destroy"]);
     Route::post('store', [AuthController::class, "store"]);
@@ -120,4 +125,19 @@ Route::group(["prefix" => "booking"], function () {
 
 
 
+});
+Route::group(["prefix" => 'wallet'], function () {
+    Route::post('store', [WalletController::class, 'store']);
+    Route::get('index', [WalletController::class, 'index']);
+});
+Route::group(["prefix" => 'transaction_type'], function () {
+    Route::post('store', [TransactionTypeController::class, 'store']);
+    Route::get('index', [TransactionTypeController::class, 'index']);
+});
+Route::group(["prefix" => 'transaction_history'], function () {
+    Route::post('store', [TransactionHistoryController::class, 'store']);
+    Route::get('index', [TransactionHistoryController::class, 'index']);
+    Route::post('transfer', [TransactionHistoryController::class, 'transfer']);
+    Route::post('diposit', [TransactionHistoryController::class, 'diposit']);
+    Route::post('withfdraw', [TransactionHistoryController::class, 'withfdraw']);
 });

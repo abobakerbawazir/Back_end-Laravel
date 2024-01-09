@@ -49,6 +49,15 @@ class User extends Authenticatable
     function getUrlAttribute() {
         return env('APP_URL').':8000/storage/'.substr($this->attributes['image'],7);
     }
+    /**
+     * Get the wallets that owns the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class, 'user_id', 'id');
+    }
     // public function booking(){
     //     return $this->hasMany(Booking::class);
     // }

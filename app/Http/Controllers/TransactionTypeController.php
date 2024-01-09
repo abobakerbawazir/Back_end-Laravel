@@ -3,15 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction_type;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class TransactionTypeController extends Controller
 {
+    use ApiResponse;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        $result=Transaction_type::all();
+        return $this->success_response(data:$result);
+
         //
     }
 
@@ -28,6 +34,12 @@ class TransactionTypeController extends Controller
      */
     public function store(Request $request)
     {
+        $validation = $this->rules($request);
+        if ($validation->fails()) {
+            return $this->failed_response(data: $validation->errors());
+        }
+        $result = Transaction_type::create($request->all());
+        return $this->success_response(data: $result);
         //
     }
 
@@ -61,5 +73,15 @@ class TransactionTypeController extends Controller
     public function destroy(Transaction_type $transaction_type)
     {
         //
+    }
+    function rules(Request $request)
+    {
+        return Validator::make(
+            $request->all(),
+            [
+                'name' => ['required','string','unique:transaction_types,name'],
+            ]
+
+        );
     }
 }

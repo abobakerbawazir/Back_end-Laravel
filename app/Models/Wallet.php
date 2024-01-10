@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use League\CommonMark\Extension\CommonMark\Node\Inline\Code;
 use PhpParser\Node\Expr\Cast\Double;
+use Illuminate\Support\Str;
+
 
 class Wallet extends Model
 {
@@ -25,6 +27,12 @@ class Wallet extends Model
     public function updateBalance($amount){
         $this->balance+=$amount;
         $this->save();
+    }public function uniqueGenerateCode(){
+        $code=Str::random(15);
+        while(Wallet::where('code',$code)->exists()){
+            $code=Str::random(15);
+        }
+        return$code;
     }
     
 }

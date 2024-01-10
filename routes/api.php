@@ -132,6 +132,7 @@ Route::group(["prefix" => "booking"], function () {
 Route::group(["prefix" => 'wallet'], function () {
     Route::post('store', [WalletController::class, 'store']);
     Route::get('index', [WalletController::class, 'index']);
+    Route::get('show/{id}', [WalletController::class, 'show']);
 });
 Route::group(["prefix" => 'transaction_type'], function () {
     Route::post('store', [TransactionTypeController::class, 'store']);
@@ -143,6 +144,6 @@ Route::group(["prefix" => 'transaction_history'], function () {
     Route::post('transfer', [TransactionHistoryController::class, 'transfer']);
     Route::post('diposit', [TransactionHistoryController::class, 'diposit']);
     Route::post('withdraw', [TransactionHistoryController::class, 'withdraw']);
-    Route::get('checkbooking', [TransactionHistoryController::class, 'checkbooking']);
+    Route::get('checkbooking/{id}', [TransactionHistoryController::class, 'checkbooking']);
     
 });

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ProfileResourse;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Auth;
@@ -11,6 +13,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Str;
+
 
 class AuthController extends Controller
 {
@@ -226,8 +230,10 @@ class AuthController extends Controller
         }
 
         $user->token = $user->createToken('api_token')->plainTextToken;
+        $user->wallet;
+        
         //$user->role = $user->roles()->first()->name;
-        return $this->success_response(data:new UserResource($user));
+        return $this->success_response(data:new ProfileResourse($user));
     }
 
     function signup(Request $request)
@@ -242,7 +248,17 @@ class AuthController extends Controller
         $user = User::create($request->all());
         $user->assignRole($request->role);
         $user->role = $user->roles()->first()->name;
-        return $this->success_response(data: $user);
+        $code=$this->uniqueGenerateCode();
+        $wallet=Wallet::create(['code'=>$code,'balance'=>0,'user_id'=>$user->id]);
+        // return $this->success_response(data:$wallet);
+        return $this->success_response(data: [$user,$wallet]);
+    }
+    public function uniqueGenerateCode(){
+        $code=Str::random(15);
+        while(Wallet::where('code',$code)->exists()){
+            $code=Str::random(15);
+        }
+        return$code;
     }
 
     function logout()

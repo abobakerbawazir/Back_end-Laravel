@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\balanceResourse;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Traits\ApiResponse;
@@ -48,8 +49,10 @@ class WalletController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Wallet $wallet)
+    public function show(int $id)
     {
+        $result=Wallet::where('id',$id)->first();
+        return response()->json(new balanceResourse($result));
         //
     }
 

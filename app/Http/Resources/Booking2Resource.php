@@ -17,7 +17,7 @@ class Booking2Resource extends JsonResource
         return array_merge(
             parent::toArray($request),
             [
-                'coustomerImage' => $this->user->image ?? "http://192.168.179.98:8000/storage/photo_upload/users/100.png"
+                'coustomerImage' => $this->user->image ?? "http://192.168.179.98:8000/storage/photo_upload/users/user-profile-icon-front-side.jpg"
             ],
         );
     }

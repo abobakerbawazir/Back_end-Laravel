@@ -144,6 +144,17 @@ Route::group(["prefix" => 'transaction_history'], function () {
     Route::post('transfer', [TransactionHistoryController::class, 'transfer']);
     Route::post('diposit', [TransactionHistoryController::class, 'diposit']);
     Route::post('withdraw', [TransactionHistoryController::class, 'withdraw']);
-    Route::get('checkbooking/{id}', [TransactionHistoryController::class, 'checkbooking']);
+    Route::get('getBranchIdBooking/{id}', [TransactionHistoryController::class, 'getBranchIdBooking']);
+    Route::get('getInfoOneTransactionHistoryToTransfer/{id}', [TransactionHistoryController::class, 'getInfoOneTransactionHistoryToTransfer']);
+    Route::get('getInfoAllTransactionHistoryToTransfer', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryToTransfer']);
+    Route::get('getInfoAllTransactionHistory', [TransactionHistoryController::class, 'getInfoAllTransactionHistory']);
+    Route::get('getInfoAllTransactionHistoryNotTransfer', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryNotTransfer']);
+    Route::get('getInfoAllTransactionHistoryDiposit', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryDiposit']);
+    Route::get('getonlyTransactionHistoryDipositWithStatusFalse', [TransactionHistoryController::class, 'getonlyTransactionHistoryDipositWithStatusFalse']);
+    Route::get('updateDiposit/{id}', [TransactionHistoryController::class, 'updateDiposit']);
+
+    
+    
+
     
 });

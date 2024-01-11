@@ -202,16 +202,18 @@ class BookingController extends Controller
                     $booking = Booking::create(['car_id' => $carId, 'user_id' => $userId, 'from' => $request->from, 'to' => $request->to, 'total' => intval($diffInDays) * $car->price, 'status' => $request->status ?? 'معلق',]);
                     $obj = $car;
                     $result = tap($obj);
-                    if ($booking->status == 'مكتمل') {
+                    if ($booking->status == 'مؤكد') {
                         $result = tap($obj)->update(['active' => true]);
+                        $result->save();
                     }
                     return response()->json(['data' => $booking, "type" => 'تم حجز السيارة بنجاح', "days" => intval($diffInDays), "active" => $result], status: 201);
                 } else {
                     $booking = Booking::create(['car_id' => $carId, 'user_id' => $userId, 'from' => $request->from, 'to' => $request->to, 'total' => intval($diffInDays) * $car->price, 'status' => $request->status ?? 'معلق',]);
                     $obj = $car;
                     $result = tap($obj);
-                    if ($booking->status == 'مكتمل') {
+                    if ($booking->status == 'مؤكد') {
                         $result = tap($obj)->update(['active' => true]);
+                        $result->save();
                     }
                     return response()->json(['data' => $booking, "type" => 'تم حجز السيارة بنجاح', "days" => intval($diffInDays), "active" => $result], status: 201);
                 }
@@ -301,6 +303,9 @@ class BookingController extends Controller
         if (!is_null($obj)) {
             $car = Car::findOrFail($obj->car_id);
             if ($request->status == 'مؤكد') {
+                if($obj->payment_status!='عبر المحفظة'){
+                    $obj->updatePaymentStatus('عند الاستلام');
+                }
                 $car->active = true;
             } elseif ($request->status == 'مكتمل') {
                 $car->active = false;

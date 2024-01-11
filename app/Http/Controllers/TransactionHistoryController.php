@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TransferResourse;
 use App\Models\Booking;
-use App\Models\Car;
+// use App\Models\Car;
 use App\Models\Transaction_history;
 use App\Models\Transaction_type;
 use App\Models\User;
@@ -11,6 +12,8 @@ use App\Models\Wallet;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+
+use function PHPSTORM_META\map;
 
 class TransactionHistoryController extends Controller
 {
@@ -20,8 +23,58 @@ class TransactionHistoryController extends Controller
      */
     public function index()
     {
-        $result = Transaction_history::all();
+        $result = Transaction_history::with('transactionType', 'wallet',)->get();
         return $this->success_response(data: $result);
+        //
+    }
+    public function getInfoAllTransactionHistoryToTransfer()
+    {
+        $result = Transaction_history::where('transaction_type_id', 2)->with('transactionType', 'wallet.user', 'booking.user', 'booking.cars.users')->get();
+        // //$x=Booking::find(298);
+        // $x=$result->booking->cars->users->id;
+        // $w=Wallet::where('user_id',$x)->first();
+        return $this->success_response(data: $result);
+        //
+    }
+    public function getInfoOneTransactionHistoryToTransfer($id)
+    {
+        $result = Transaction_history::where('transaction_type_id', 2)->where('booking_id', $id)->with('transactionType', 'wallet.user', 'booking.user', 'booking.cars.users')->first();
+        $x = $result->booking->cars->users->id;
+        $w = Wallet::where('user_id', $x)->first();
+        return $this->success_response(data: ["walletBranch" => $w, "transaction" => $result]);
+        //
+    }
+    public function getInfoAllTransactionHistory()
+    {
+        $result = Transaction_history::with('transactionType', 'wallet', 'booking')->get();
+        return $this->success_response(data: $result);
+        //
+    }
+    public function getInfoAllTransactionHistoryNotTransfer()
+    {
+        $result = Transaction_history::where('transaction_type_id', '!=', 2)->with('transactionType', 'wallet', 'booking')->get();
+        return $this->success_response(data: $result);
+        //
+    }
+    public function getInfoAllTransactionHistoryDiposit()
+    {
+        $results = Transaction_history::where('transaction_type_id', '=', 3)->with('transactionType', 'wallet.user')->get();
+        $resultStatus = $results->map(function ($result) {
+            $result->status = $result->status == 1 ? true : false;
+            $result->wallet->user->image=$result->wallet->user->image!=null?$result->wallet->user->image:env('APP_URL').":8000/storage/photo_upload/cars/404.png";
+            return $result;
+        });
+        return $this->success_response(data: $resultStatus);
+        //
+    }
+    public function getonlyTransactionHistoryDipositWithStatusFalse()
+    {
+        $results = Transaction_history::where('transaction_type_id', '=', 1)->where('status', '=', false)->with('transactionType', 'wallet')->get();
+        $resultStatus = $results->map(function ($result) {
+            $result->status = $result->status == 1 ? true : false;
+            return $result;
+        });
+        return $this->success_response(data: $resultStatus);
         //
     }
 
@@ -67,25 +120,26 @@ class TransactionHistoryController extends Controller
             if ($validation->fails()) {
                 return $this->failed_response(data: $validation->errors());
             }
-            $checkBookingId=Transaction_history::where('booking_id','=',$request->booking_id)->first();
-            if(!is_null($checkBookingId)){
-                return $this->failed_response(data:'لايمكن الدفع مرة اخرى لنفس عملية الحجز');
+            $checkBookingId = Transaction_history::where('booking_id', '=', $request->booking_id)->first();
+            if (!is_null($checkBookingId)) {
+                return $this->failed_response(data: 'لايمكن الدفع مرة اخرى لنفس عملية الحجز');
             }
             $booking = Booking::find($request->booking_id);
-            $walletx = Wallet::where('id', '=', $request->wallet_id)->first();
-            if ($request->amount <= $walletx->balance) {
-                if ($booking->total > $walletx->balance) {
-                    return $this->failed_response(data: 'لايمكن ان يكون مبلغ الحجز' . $booking->total . 'اكبر من المبلغ الموجود في المحفظة الا وهو ' . $walletx->balance);
+            $walletCustomer = Wallet::where('id', '=', $request->wallet_id)->first();
+            if ($request->amount <= $walletCustomer->balance) {
+                if ($booking->total > $walletCustomer->balance) {
+                    return $this->failed_response(data: 'لايمكن ان يكون مبلغ الحجز' . $booking->total . 'اكبر من المبلغ الموجود في المحفظة الا وهو ' . $walletCustomer->balance);
                 }
                 $result = Transaction_history::create(['wallet_id' => $request->wallet_id, 'booking_id' => $request->booking_id, 'amount' => $booking->total, 'transaction_type_id' => $type->id]);
-                $x=$this->checkbooking($request->booking_id);
-                $branch = Wallet::where('user_id', '=', $x)->first();
-                $walletx->updateBalance(- ($result->amount));
-                $branch->updateBalance( $result->amount);
-                // $result->wallet_id->updateBalance($result->amount);
-                return $this->success_response(data: [$result, $walletx,$branch]);
+                $branchId = $this->getBranchIdBooking($request->booking_id);
+                $walletBranch = Wallet::where('user_id', '=', $branchId)->first();
+                $booking->updatePaymentStatus('عبر المحفظة');
+                $booking->updateStatus('مؤكد');
+                $walletCustomer->updateBalance(- ($result->amount));
+                $walletBranch->updateBalance($result->amount);
+                return response()->json(data: TransferResourse::collection(["result" => $result, "walletCustomer" => $walletCustomer, "walletBranch" => $walletBranch, "booking" => $booking]));
             }
-            return $this->failed_response(data: 'لا يمكن أن يكون مبلغ الحجز' . $booking->total . 'اكبر من المبلغ الموجود في المحفظة الا وهو' . $walletx->balance);
+            return $this->failed_response(data: 'لا يمكن أن يكون مبلغ الحجز' . $booking->total . 'اكبر من المبلغ الموجود في المحفظة الا وهو' . $walletCustomer->balance);
         }
 
         return $this->failed_response(data: 'لايمكنك استحدام هذه العملية الا فقط للسحب');
@@ -133,12 +187,31 @@ class TransactionHistoryController extends Controller
             }
             $result = Transaction_history::create(['wallet_id' => $request->wallet_id, 'booking_id' => null, 'amount' => $request->amount, 'transaction_type_id' => $type->id]);
             $walletx = Wallet::where('id', '=', $result->wallet_id)->first();
-            $walletx->updateBalance($result->amount);
+            if ($result->status == true) {
+                $walletx->updateBalance($result->amount);
+            }
             // $result->wallet_id->updateBalance($result->amount);
             return $this->success_response(data: [$result, $walletx]);
         }
 
         return $this->failed_response(data: 'لايمكنك استحدام هذه العملية الا فقط للايداع');
+    }
+    public function updateDiposit(int $id){
+        $obj = Transaction_history::find($id);
+        if (!is_null($obj)) {
+            // $result = tap($obj)->update($obj->status);
+            
+            if($obj->status==true){
+                return $this->success_response(data: 'تم قبول الطلب بالفعل ولا يمكن تكرار نفس العملية بنفس السند');
+            }
+            $obj->updateStatus();
+            $wallet=Wallet::find($obj->wallet_id);
+            $b=$obj->amount;
+            $wallet->updateBalance($b);
+            return $this->success_response(data: [$obj,$wallet]);
+        } else {
+            return $this->failed_response(code: 404);
+        }
     }
 
     /**
@@ -154,7 +227,7 @@ class TransactionHistoryController extends Controller
         }
         //
     }
-    public function checkbooking($bookingId)
+    public function getBranchIdBooking($bookingId)
     {
         $bookingR = Booking::where('id', '=', $bookingId)->with('cars')->with('cars.users')->first();
         $branchId = $bookingR->cars->users->id;

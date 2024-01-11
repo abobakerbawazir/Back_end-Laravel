@@ -37,4 +37,13 @@ class Booking extends Model
     {
         return $this->belongsTo(Car::class, 'car_id');
     }
+    public function updatePaymentStatus($paymentStatus){
+        $this->payment_status=$paymentStatus;
+        $this->save();
+    }
+    public function updateStatus($status){
+        $this->status=$status;
+        $this->save();
+    }
+    
 }

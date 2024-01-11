@@ -17,6 +17,6 @@ class Transaction_type extends Model
      */
     public function transactionHistory()
     {
-        return $this->hasMany(Transaction_history::class, 'transaction_type_id', 'id');
+        return $this->hasMany(Transaction_history::class,);
     }
 }

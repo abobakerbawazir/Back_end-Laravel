@@ -24,6 +24,15 @@ class Wallet extends Model
     {
         return $this->belongsTo(User::class);
     }
+    /**
+     * Get all of the transactionHistory for the Wallet
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactionHistory()
+    {
+        return $this->hasMany(Transaction_history::class, 'wallet_id', 'id');
+    }
     public function updateBalance($amount){
         $this->balance+=$amount;
         $this->save();

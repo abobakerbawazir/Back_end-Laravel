@@ -148,10 +148,16 @@ Route::group(["prefix" => 'transaction_history'], function () {
     Route::get('getInfoOneTransactionHistoryToTransfer/{id}', [TransactionHistoryController::class, 'getInfoOneTransactionHistoryToTransfer']);
     Route::get('getInfoAllTransactionHistoryToTransfer', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryToTransfer']);
     Route::get('getInfoAllTransactionHistory', [TransactionHistoryController::class, 'getInfoAllTransactionHistory']);
-    Route::get('getInfoAllTransactionHistoryNotTransfer', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryNotTransfer']);
+    Route::get('getInfoAllTransactionHistoryNotTransfer/{id}', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryNotTransfer']);
     Route::get('getInfoAllTransactionHistoryDiposit', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryDiposit']);
     Route::get('getonlyTransactionHistoryDipositWithStatusFalse', [TransactionHistoryController::class, 'getonlyTransactionHistoryDipositWithStatusFalse']);
     Route::get('updateDiposit/{id}', [TransactionHistoryController::class, 'updateDiposit']);
+    Route::get('getConutTransactionHistory/{id}', [TransactionHistoryController::class, 'getConutTransactionHistory']);
+    Route::get('getConutTransactionHistoryDipositStateFalse', [TransactionHistoryController::class, 'getConutTransactionHistoryDipositStateFalse']);
+
+    
+
+    
 
     
     

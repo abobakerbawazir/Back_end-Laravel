@@ -29,20 +29,57 @@ class TransactionHistoryController extends Controller
     }
     public function getInfoAllTransactionHistoryToTransfer()
     {
-        $result = Transaction_history::where('transaction_type_id', 2)->with('transactionType', 'wallet.user', 'booking.user', 'booking.cars.users')->get();
+        $results = Transaction_history::where('transaction_type_id', 2)->with('transactionType', 'wallet.user', 'booking.user', 'booking.cars.users')->get();
+        $resultStatus = $results->map(function ($result) {
+            $result->status = $result->status == 1 ? true : false;
+            $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+            return $result;
+        });
         // //$x=Booking::find(298);
         // $x=$result->booking->cars->users->id;
         // $w=Wallet::where('user_id',$x)->first();
-        return $this->success_response(data: $result);
+        return $this->success_response(data: $resultStatus);
         //
     }
     public function getInfoOneTransactionHistoryToTransfer($id)
     {
-        $result = Transaction_history::where('transaction_type_id', 2)->where('booking_id', $id)->with('transactionType', 'wallet.user', 'booking.user', 'booking.cars.users')->first();
+        $result = Transaction_history::where('transaction_type_id', 2)->where('id', $id)->with('transactionType', 'booking.user', 'wallet.user', 'booking.cars.users')->first();
+        $result->status = $result->status == 1 ? true : false;
+        $result->booking->user->active = $result->booking->user->active == 1 ? true : false;
+        $result->booking->cars->users->active =  $result->booking->cars->users->active == 1 ? true : false;
+        $result->wallet->user->active =  $result->wallet->user->active == 1 ? true : false;
+        $result->booking->cars->active =  $result->booking->cars->active == 1 ? true : false;
+        $result->wallet->user->active =  $result->wallet->user->active == 1 ? true : false;
+        $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+        $result->booking->user->image = $result->booking->user->image != null ? $result->booking->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+        $result->booking->cars->users->image = $result->booking->cars->users->image != null ? $result->booking->cars->users->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
         $x = $result->booking->cars->users->id;
-        $w = Wallet::where('user_id', $x)->first();
-        return $this->success_response(data: ["walletBranch" => $w, "transaction" => $result]);
-        //
+        $userCustomer = $result->wallet->user;
+        $userBooking = $result->booking->user;
+        $userCars = $result->booking->cars->users;
+        $transactionType = array_merge(["id" => $result->transactiontype->id, "name" => $result->transactiontype->name]);
+        $treansaction = array_merge([
+            "id" => $result->id, "transaction_type_id" => $result->transaction_type_id, "wallet_id" => $result->wallet_id, "booking_id" => $result->booking_id,
+            "amount" => $result->amount, "status" => $result->status, "description" => $result->description
+        ]);
+        $booking = array_merge([
+            "id" => $result->booking->id,
+            "from" => $result->booking->from,
+            "to" => $result->booking->to, "total" => $result->booking->total, "user_id" => $result->booking->user_id, "car_id" => $result->booking->car_id, "status" => $result->booking->status, "payment_status" => $result->booking->payment_status
+        ]);
+        $walletCustomer = array_merge(["id" => $result->wallet->id, "code" => $result->wallet->code, "balance" => $result->wallet->balance, "user_id" => $result->wallet->user_id]);
+        $walletBranch = Wallet::where('user_id', $x)->first();
+        $walletBranchx = array_merge(["id" => $walletBranch->id, "code" => $walletBranch->code, "balance" => $walletBranch->balance, "user_id" => $walletBranch->user_id]);
+        $userBranch = User::where('id', $walletBranch->user_id)->first();
+        $userBranch->image = $userBranch->image != null ? $userBranch->booking->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+
+        $userBranch->active =  $userBranch->active  == 1 ? true : false;
+
+        $car = array_merge([
+            "id" => $result->booking->cars->id, "name" => $result->booking->cars->name, "model" => $result->booking->cars->model,
+            "active" => $result->booking->cars->active, "price" => $result->booking->cars->price, "user_id" => $result->booking->cars->user_id, "prand_id" => $result->booking->cars->prand_id,
+        ]);
+        return $this->success_response(data: ["userBranch" => $userBranch, "transactionType" => $transactionType, "treansaction" => $treansaction, "booking" => $booking, "userCars" => $userCars, "userBooking" => $userBooking, 'walletCustomer' => $walletCustomer, 'userCustomer' => $userCustomer, "walletBranch" => $walletBranchx, "car" => $car]);
     }
     public function getInfoAllTransactionHistory()
     {
@@ -50,10 +87,35 @@ class TransactionHistoryController extends Controller
         return $this->success_response(data: $result);
         //
     }
-    public function getInfoAllTransactionHistoryNotTransfer()
+    public function getInfoAllTransactionHistoryNotTransfer($id)
     {
-        $result = Transaction_history::where('transaction_type_id', '!=', 2)->with('transactionType', 'wallet', 'booking')->get();
-        return $this->success_response(data: $result);
+        if ($id == 'all') {
+            $results = Transaction_history::with('transactionType', 'wallet.user')->get();
+            $resultStatus = $results->map(function ($result) {
+                $result->status = $result->status == 1 ? true : false;
+                $result->wallet->user->active = $result->wallet->user->active == 1 ? true : false;
+                $result->booking_id = $result->booking_id != null ? $result->booking_id : -1;
+
+                $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+                return $result;
+            });
+            return $this->success_response(data: $resultStatus);
+        } else {
+            $results = Transaction_history::where('transaction_type_id', '=', $id)->with('transactionType', 'wallet.user')->get();
+            if ($id != '2') {
+                $resultStatus = $results->map(function ($result) {
+                    $result->status = $result->status == 1 ? true : false;
+                    $result->wallet->user->active = $result->wallet->user->active == 1 ? true : false;
+                    $result->booking_id = $result->booking_id != null ? $result->booking_id : -1;
+                    $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+                    return $result;
+                });
+                return $this->success_response(data: $resultStatus);
+            }
+            return $this->success_response(data: []);
+        }
+
+
         //
     }
     public function getInfoAllTransactionHistoryDiposit()
@@ -61,11 +123,29 @@ class TransactionHistoryController extends Controller
         $results = Transaction_history::where('transaction_type_id', '=', 3)->with('transactionType', 'wallet.user')->get();
         $resultStatus = $results->map(function ($result) {
             $result->status = $result->status == 1 ? true : false;
-            $result->wallet->user->image=$result->wallet->user->image!=null?$result->wallet->user->image:env('APP_URL').":8000/storage/photo_upload/cars/404.png";
+            $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
             return $result;
         });
         return $this->success_response(data: $resultStatus);
         //
+    }
+    public function getConutTransactionHistory($id)
+    {
+        if ($id == 'all') {
+            $results = Transaction_history::count();
+            return $this->success_response(data: $results);
+        } 
+        else {
+            $results = Transaction_history::where('transaction_type_id', '=', $id)->count();
+            return $this->success_response(data: $results);
+        }
+
+        //
+    }
+    public function getConutTransactionHistoryDipositStateFalse()
+    {
+        $results = Transaction_history::where('transaction_type_id', '=', 3)->where('status', '=', false)->with('transactionType', 'wallet.user')->count();
+        return $this->success_response(data: $results);
     }
     public function getonlyTransactionHistoryDipositWithStatusFalse()
     {
@@ -196,19 +276,20 @@ class TransactionHistoryController extends Controller
 
         return $this->failed_response(data: 'لايمكنك استحدام هذه العملية الا فقط للايداع');
     }
-    public function updateDiposit(int $id){
+    public function updateDiposit(int $id)
+    {
         $obj = Transaction_history::find($id);
         if (!is_null($obj)) {
             // $result = tap($obj)->update($obj->status);
-            
-            if($obj->status==true){
+
+            if ($obj->status == true) {
                 return $this->success_response(data: 'تم قبول الطلب بالفعل ولا يمكن تكرار نفس العملية بنفس السند');
             }
             $obj->updateStatus();
-            $wallet=Wallet::find($obj->wallet_id);
-            $b=$obj->amount;
+            $wallet = Wallet::find($obj->wallet_id);
+            $b = $obj->amount;
             $wallet->updateBalance($b);
-            return $this->success_response(data: [$obj,$wallet]);
+            return $this->success_response(data: [$obj, $wallet]);
         } else {
             return $this->failed_response(code: 404);
         }

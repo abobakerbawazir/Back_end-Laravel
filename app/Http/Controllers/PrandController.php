@@ -91,7 +91,7 @@ class PrandController extends Controller
         if ($request->has('image_path')) {
             $image = $request->file('image_path');
             $image_name = time() . '_image.' . $image->getClientOriginalExtension();
-            $path = 'public/photo_upload/products';
+            $path = 'public/photo_upload/prands';
             $stored_path = $image->storeAs($path, $image_name);
             $request['path'] = $stored_path;
             $result = Prand::create($request->all());

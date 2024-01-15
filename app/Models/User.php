@@ -12,7 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable,HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +24,6 @@ class User extends Authenticatable
         'phone',
         'full_name',
         'active',
-        'user_type',
         'image',
         'location',
         'email',
@@ -34,7 +33,8 @@ class User extends Authenticatable
     // {
     //     return $this->belongsToMany(Car::class,'bookings')->withPivot(['from','to','total'])->withTimestamps();
     // }
-    public function usercars(){
+    public function usercars()
+    {
         return $this->hasMany(Car::class);
     }
     /**
@@ -49,8 +49,9 @@ class User extends Authenticatable
     // function getUrlAttribute() {
     //     return env('APP_URL').':8000/storage/'.substr($this->attributes['image'],7);
     // }
-    function getImageAttribute() {
-        return env('APP_URL').':8000/storage/'.substr($this->attributes['image'],7);
+    function getImageAttribute()
+    {
+        return env('APP_URL') . ':8000/storage/' . substr($this->attributes['image'],   7);
     }
     /**
      * Get the wallets that owns the User

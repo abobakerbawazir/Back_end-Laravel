@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->date('from');
             $table->date('to');
-            $table->integer('total');
+            $table->double('total');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('car_id')->references('id')->on('cars')->onDelete('cascade');
             $table->softDeletes();

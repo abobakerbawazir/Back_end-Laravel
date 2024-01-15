@@ -33,7 +33,7 @@ class TransactionHistoryController extends Controller
         $results = Transaction_history::where('transaction_type_id', 2)->with('transactionType', 'wallet.user', 'booking.user', 'booking.cars.users')->get();
         $resultStatus = $results->map(function ($result) {
             $result->status = $result->status == 1 ? true : false;
-            $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+           // $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
             return $result;
         });
         // //$x=Booking::find(298);
@@ -51,7 +51,7 @@ class TransactionHistoryController extends Controller
         })->get();
         $resultStatus = $results->map(function ($result) {
             $result->status = $result->status == 1 ? true : false;
-            $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+            //$result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
             return $result;
         });
         // //$x=Booking::find(298);
@@ -65,7 +65,7 @@ class TransactionHistoryController extends Controller
         $results = Transaction_history::where('transaction_type_id', 2)->where('wallet_id', $id)->with('transactionType', 'wallet.user', 'booking.user', 'booking.cars.users')->get();
         $resultStatus = $results->map(function ($result) {
             $result->status = $result->status == 1 ? true : false;
-            $result->wallet->user->image = $result->wallet->user->image != "http://192.168.179.98:8000/storage/" ? $result->wallet->user->image :  ":8000//photo_upload/cars/404.png";
+            //$result->wallet->user->image = $result->wallet->user->image != "http://192.168.179.98:8000/storage/" ? $result->wallet->user->image :  ":8000//photo_upload/cars/404.png";
             return $result;
         });
         // //$x=Booking::find(298);
@@ -83,9 +83,9 @@ class TransactionHistoryController extends Controller
         $result->wallet->user->active =  $result->wallet->user->active == 1 ? true : false;
         $result->booking->cars->active =  $result->booking->cars->active == 1 ? true : false;
         $result->wallet->user->active =  $result->wallet->user->active == 1 ? true : false;
-        $result->wallet->user->image = $result->wallet->user->image == null? $result->wallet->user->image :":8000//photo_upload/cars/404.png";
-        $result->booking->user->image = $result->booking->user->image != "http://192.168.179.98:8000/storage/" ? $result->booking->user->image :":8000//photo_upload/cars/404.png";
-        $result->booking->cars->users->image = $result->booking->cars->users->image != "http://192.168.179.98:8000/storage/" ? $result->booking->cars->users->image :":8000//photo_upload/cars/404.png";
+      //  $result->wallet->user->image = $result->wallet->user->image == null? $result->wallet->user->image :":8000//photo_upload/cars/404.png";
+       // $result->booking->user->image = $result->booking->user->image != "http://192.168.179.98:8000/storage/" ? $result->booking->user->image :":8000//photo_upload/cars/404.png";
+       // $result->booking->cars->users->image = $result->booking->cars->users->image != "http://192.168.179.98:8000/storage/" ? $result->booking->cars->users->image :":8000//photo_upload/cars/404.png";
         $x = $result->booking->cars->users->id;
         $userCustomer = $result->wallet->user;
         $userBooking = $result->booking->user;
@@ -104,7 +104,7 @@ class TransactionHistoryController extends Controller
         $walletBranch = Wallet::where('user_id', $x)->first();
         $walletBranchx = array_merge(["id" => $walletBranch->id, "code" => $walletBranch->code, "balance" => $walletBranch->balance, "user_id" => $walletBranch->user_id]);
         $userBranch = User::where('id', $walletBranch->user_id)->first();
-        $userBranch->image = $userBranch->image != "http://192.168.179.98:8000/storage/" ? $userBranch->booking->image :":8000//photo_upload/cars/404.png";
+       // $userBranch->image = $userBranch->image != "http://192.168.179.98:8000/storage/" ? $userBranch->booking->image :":8000//photo_upload/cars/404.png";
 
         $userBranch->active =  $userBranch->active  == 1 ? true : false;
 
@@ -129,7 +129,7 @@ class TransactionHistoryController extends Controller
                 $result->wallet->user->active = $result->wallet->user->active == 1 ? true : false;
                 $result->booking_id = $result->booking_id != null ? $result->booking_id : -1;
 
-                $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+              //  $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
                 return $result;
             });
             return $this->success_response(data: $resultStatus);
@@ -140,7 +140,7 @@ class TransactionHistoryController extends Controller
                     $result->status = $result->status == 1 ? true : false;
                     $result->wallet->user->active = $result->wallet->user->active == 1 ? true : false;
                     $result->booking_id = $result->booking_id != null ? $result->booking_id : -1;
-                    $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+                  //  $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
                     return $result;
                 });
                 return $this->success_response(data: $resultStatus);
@@ -156,7 +156,7 @@ class TransactionHistoryController extends Controller
         $results = Transaction_history::where('transaction_type_id', '=', 3)->with('transactionType', 'wallet.user')->get();
         $resultStatus = $results->map(function ($result) {
             $result->status = $result->status == 1 ? true : false;
-            $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+           // $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
             return $result;
         });
         return $this->success_response(data: $resultStatus);
@@ -187,7 +187,7 @@ class TransactionHistoryController extends Controller
             $result->status = $result->status == 1 ? true : false;
             $result->wallet->user->active = $result->wallet->user->active == 1 ? true : false;
             $result->booking_id = $result->booking_id != null ? $result->booking_id : -1;
-            $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+           // $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
             return $result;
         });
         return $this->success_response(data: $resultStatus);
@@ -342,7 +342,7 @@ class TransactionHistoryController extends Controller
                 $result->wallet->user->active = $result->wallet->user->active == 1 ? true : false;
                 $result->booking_id = $result->booking_id != null ? $result->booking_id : -1;
 
-                $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+               // $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
                 return $result;
             });
             return $this->success_response(data: $resultStatus);

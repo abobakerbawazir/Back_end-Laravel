@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('model');
             $table->boolean('active')->default(false);
-            $table->integer('price');
+            $table->double('price');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('prand_id')->references('id')->on('prands')->onDelete('cascade');
             $table->softDeletes();

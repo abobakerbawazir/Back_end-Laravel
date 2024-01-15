@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('transaction_type_id')->references('id')->on('transaction_types')->onDelete('cascade');
             $table->foreignId('wallet_id')->references('id')->on('wallets')->onDelete('cascade');
             $table->foreignId('booking_id')->nullable()->references('id')->on('bookings')->onDelete('cascade');
-            $table->integer('amount');
+            $table->double('amount');
             $table->softDeletes();
             $table->timestamps();
         });

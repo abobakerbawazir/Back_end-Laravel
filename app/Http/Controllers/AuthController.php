@@ -190,7 +190,6 @@ class AuthController extends Controller
                 'email' => $signIn ? '' : ['required', 'email', $signIn ? '' : 'unique:users,email'],
                 'phone' => $signIn ? '' : 'required|unique:users,phone|numeric|digits:9',
                 'password' => $signIn ? '' : ['required', $signIn ? '' : 'confirmed', 'min:8'],
-                'user_type' => $signIn ? '' : 'required',
                 'role' => $signIn ? '' : 'required|string'
             ]
 
@@ -247,18 +246,16 @@ class AuthController extends Controller
         if ($request->has('image_path')) {
             $image = $request->file('image_path');
             $image_name = time() . '_image.' . $image->getClientOriginalExtension();
-            $path = 'public/photo_upload/usersSignUp';
+            $path = 'public/photo_upload/users';
             $stored_path = $image->storeAs($path, $image_name);
             $request['image'] = $stored_path;
-            // $resualimage = User::create(['image'=>$stored_path]);
             $user = User::create($request->all());
-            // return ($user);
             $user->assignRole($request->role);
             $user->role = $user->roles()->first()->name;
             $code = $this->uniqueGenerateCode();
             $wallet = Wallet::create(['code' => $code, 'balance' => 0, 'user_id' => $user->id]);
             // return $this->success_response(data:$wallet);
-            return $this->success_response(data: [$user, $wallet]);
+            return $this->success_response(data:$user);
             // return $this->success_response(data: $result);
         }
     }
@@ -279,7 +276,7 @@ class AuthController extends Controller
         $code = $this->uniqueGenerateCode();
         $wallet = Wallet::create(['code' => $code, 'balance' => 0, 'user_id' => $user->id]);
         // return $this->success_response(data:$wallet);
-        return $this->success_response(data: [$user, $wallet]);
+        return $this->success_response(data: $user);
     }
     public function uniqueGenerateCode()
     {

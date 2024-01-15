@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->string('image')->nullable('100');
+            $table->string('image')->default('public/photo_upload/users/404.png');
             $table->string('location')->default('غير محدد');
         });
     }

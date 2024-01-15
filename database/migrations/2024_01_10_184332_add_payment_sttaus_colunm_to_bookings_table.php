@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->enum('payment_status',['عند الاستلام','عبر المحفظة','لم يتم الدفع'])->default('لم يتم الدفع');
+            $table->enum('payment_status',['عند الاستلام','عبر المحفظة'])->default('عند الاستلام');
 
             //
         });

@@ -66,7 +66,7 @@ class BookingController extends Controller
     public function getByIDInformationBookingForAllCustomer(int $id)
     {
         $booking = Booking::where('id', $id)->with('cars.users')->with('cars.image_car_brands')->with('user')->first();
-        $booking->user->image =  $booking->user->image ?? "http://192.168.179.98:8000/storage/photo_upload/users/100.png";
+        $booking->user->image =  $booking->user->image !="http://192.168.179.98:8000/storage/"?$booking->user->image: "8000///photo_upload/users/100.png";
         // $result = [
         //     'booking' => $booking,
         //     'cars' =>  ,

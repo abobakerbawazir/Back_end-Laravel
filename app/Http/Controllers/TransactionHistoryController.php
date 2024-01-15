@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\TransferResourse;
 use App\Models\Booking;
+use App\Models\Car;
 // use App\Models\Car;
 use App\Models\Transaction_history;
 use App\Models\Transaction_type;
@@ -41,6 +42,38 @@ class TransactionHistoryController extends Controller
         return $this->success_response(data: $resultStatus);
         //
     }
+    public function getBranchInfoAllTransactionHistoryToTransfer($branch_id)
+    {
+        $results = Transaction_history::where('transaction_type_id', 2)->
+        with('transactionType', 'wallet.user', 'booking.user', 'booking.cars.users')
+        ->whereHas('booking.cars.users', function ($query) use ($branch_id) {
+            $query->where('users.id', $branch_id);
+        })->get();
+        $resultStatus = $results->map(function ($result) {
+            $result->status = $result->status == 1 ? true : false;
+            $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+            return $result;
+        });
+        // //$x=Booking::find(298);
+        // $x=$result->booking->cars->users->id;
+        // $w=Wallet::where('user_id',$x)->first();
+        return $this->success_response(data: $resultStatus);
+        //
+    }
+    public function getCustomerTransactionHistoryToTransfer($id)
+    {
+        $results = Transaction_history::where('transaction_type_id', 2)->where('wallet_id', $id)->with('transactionType', 'wallet.user', 'booking.user', 'booking.cars.users')->get();
+        $resultStatus = $results->map(function ($result) {
+            $result->status = $result->status == 1 ? true : false;
+            $result->wallet->user->image = $result->wallet->user->image != "http://192.168.179.98:8000/storage/" ? $result->wallet->user->image :  ":8000//photo_upload/cars/404.png";
+            return $result;
+        });
+        // //$x=Booking::find(298);
+        // $x=$result->booking->cars->users->id;
+        // $w=Wallet::where('user_id',$x)->first();
+        return $this->success_response(data: $resultStatus);
+        //
+    }
     public function getInfoOneTransactionHistoryToTransfer($id)
     {
         $result = Transaction_history::where('transaction_type_id', 2)->where('id', $id)->with('transactionType', 'booking.user', 'wallet.user', 'booking.cars.users')->first();
@@ -50,9 +83,9 @@ class TransactionHistoryController extends Controller
         $result->wallet->user->active =  $result->wallet->user->active == 1 ? true : false;
         $result->booking->cars->active =  $result->booking->cars->active == 1 ? true : false;
         $result->wallet->user->active =  $result->wallet->user->active == 1 ? true : false;
-        $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
-        $result->booking->user->image = $result->booking->user->image != null ? $result->booking->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
-        $result->booking->cars->users->image = $result->booking->cars->users->image != null ? $result->booking->cars->users->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+        $result->wallet->user->image = $result->wallet->user->image == null? $result->wallet->user->image :":8000//photo_upload/cars/404.png";
+        $result->booking->user->image = $result->booking->user->image != "http://192.168.179.98:8000/storage/" ? $result->booking->user->image :":8000//photo_upload/cars/404.png";
+        $result->booking->cars->users->image = $result->booking->cars->users->image != "http://192.168.179.98:8000/storage/" ? $result->booking->cars->users->image :":8000//photo_upload/cars/404.png";
         $x = $result->booking->cars->users->id;
         $userCustomer = $result->wallet->user;
         $userBooking = $result->booking->user;
@@ -71,7 +104,7 @@ class TransactionHistoryController extends Controller
         $walletBranch = Wallet::where('user_id', $x)->first();
         $walletBranchx = array_merge(["id" => $walletBranch->id, "code" => $walletBranch->code, "balance" => $walletBranch->balance, "user_id" => $walletBranch->user_id]);
         $userBranch = User::where('id', $walletBranch->user_id)->first();
-        $userBranch->image = $userBranch->image != null ? $userBranch->booking->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+        $userBranch->image = $userBranch->image != "http://192.168.179.98:8000/storage/" ? $userBranch->booking->image :":8000//photo_upload/cars/404.png";
 
         $userBranch->active =  $userBranch->active  == 1 ? true : false;
 
@@ -149,9 +182,12 @@ class TransactionHistoryController extends Controller
     }
     public function getonlyTransactionHistoryDipositWithStatusFalse()
     {
-        $results = Transaction_history::where('transaction_type_id', '=', 1)->where('status', '=', false)->with('transactionType', 'wallet')->get();
+        $results = Transaction_history::where('transaction_type_id', '=', 3)->where('status', '=', false)->with('transactionType', 'wallet.user')->get();
         $resultStatus = $results->map(function ($result) {
             $result->status = $result->status == 1 ? true : false;
+            $result->wallet->user->active = $result->wallet->user->active == 1 ? true : false;
+            $result->booking_id = $result->booking_id != null ? $result->booking_id : -1;
+            $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
             return $result;
         });
         return $this->success_response(data: $resultStatus);
@@ -196,7 +232,7 @@ class TransactionHistoryController extends Controller
     {
         $type = Transaction_type::find(2);
         if (!is_null($type)) {
-            $validation = $this->rulesdiposit($request);
+            $validation = $this->rulesTransfer($request);
             if ($validation->fails()) {
                 return $this->failed_response(data: $validation->errors());
             }
@@ -205,16 +241,19 @@ class TransactionHistoryController extends Controller
                 return $this->failed_response(data: 'لايمكن الدفع مرة اخرى لنفس عملية الحجز');
             }
             $booking = Booking::find($request->booking_id);
+            $car=Car::find($booking->car_id);
             $walletCustomer = Wallet::where('id', '=', $request->wallet_id)->first();
             if ($request->amount <= $walletCustomer->balance) {
                 if ($booking->total > $walletCustomer->balance) {
                     return $this->failed_response(data: 'لايمكن ان يكون مبلغ الحجز' . $booking->total . 'اكبر من المبلغ الموجود في المحفظة الا وهو ' . $walletCustomer->balance);
                 }
-                $result = Transaction_history::create(['wallet_id' => $request->wallet_id, 'booking_id' => $request->booking_id, 'amount' => $booking->total, 'transaction_type_id' => $type->id]);
+                $result = Transaction_history::create(['wallet_id' => $request->wallet_id, 'booking_id' => $request->booking_id, 'amount' => $booking->total, 'transaction_type_id' => $type->id,"status"=>true,"description"=>$request->description??'ليس هناك وصف']);
                 $branchId = $this->getBranchIdBooking($request->booking_id);
                 $walletBranch = Wallet::where('user_id', '=', $branchId)->first();
                 $booking->updatePaymentStatus('عبر المحفظة');
                 $booking->updateStatus('مؤكد');
+                $car->active=1;
+                $car->save();
                 $walletCustomer->updateBalance(- ($result->amount));
                 $walletBranch->updateBalance($result->amount);
                 return response()->json(data: TransferResourse::collection(["result" => $result, "walletCustomer" => $walletCustomer, "walletBranch" => $walletBranch, "booking" => $booking]));
@@ -240,13 +279,13 @@ class TransactionHistoryController extends Controller
     {
         $type = Transaction_type::find(1);
         if (!is_null($type)) {
-            $validation = $this->rulesdiposit($request);
+            $validation = $this->ruleswithdraw($request);
             if ($validation->fails()) {
                 return $this->failed_response(data: $validation->errors());
             }
-            $walletx = Wallet::where('id', '=', $request->wallet_id)->first();
+            $walletx = Wallet::where('code', '=', $request->code)->first();
             if ($request->amount <= $walletx->balance) {
-                $result = Transaction_history::create(['wallet_id' => $request->wallet_id, 'booking_id' => null, 'amount' => $request->amount, 'transaction_type_id' => $type->id]);
+                $result = Transaction_history::create(['wallet_id' => $walletx->id, 'booking_id' => null, 'amount' => $request->amount, 'transaction_type_id' => $type->id,'status'=>true]);
                 $walletx->updateBalance(- ($result->amount));
                 // $result->wallet_id->updateBalance($result->amount);
                 return $this->success_response(data: [$result, $walletx]);
@@ -265,7 +304,7 @@ class TransactionHistoryController extends Controller
             if ($validation->fails()) {
                 return $this->failed_response(data: $validation->errors());
             }
-            $result = Transaction_history::create(['wallet_id' => $request->wallet_id, 'booking_id' => null, 'amount' => $request->amount, 'transaction_type_id' => $type->id]);
+            $result = Transaction_history::create(['wallet_id' => $request->wallet_id, 'booking_id' => null, 'amount' => $request->amount, 'transaction_type_id' => $type->id,"description"=>$request->description??"ليس هناك وصف"]);
             $walletx = Wallet::where('id', '=', $result->wallet_id)->first();
             if ($result->status == true) {
                 $walletx->updateBalance($result->amount);
@@ -293,6 +332,37 @@ class TransactionHistoryController extends Controller
         } else {
             return $this->failed_response(code: 404);
         }
+    }
+    public function getInfoAllTransactionHistoryforCustomer($id,$walletId)
+    {
+        if ($id == 'all') {
+            $results = Transaction_history::where("wallet_id",'=',$walletId)->with('transactionType', 'wallet.user')->get();
+            $resultStatus = $results->map(function ($result) {
+                $result->status = $result->status == 1 ? true : false;
+                $result->wallet->user->active = $result->wallet->user->active == 1 ? true : false;
+                $result->booking_id = $result->booking_id != null ? $result->booking_id : -1;
+
+                $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+                return $result;
+            });
+            return $this->success_response(data: $resultStatus);
+        } else {
+            $results = Transaction_history::where("wallet_id",'=',$walletId)->where('transaction_type_id', '=', $id)->with('transactionType', 'wallet.user')->get();
+            if ($id != '2') {
+                $resultStatus = $results->map(function ($result) {
+                    $result->status = $result->status == 1 ? true : false;
+                    $result->wallet->user->active = $result->wallet->user->active == 1 ? true : false;
+                    $result->booking_id = $result->booking_id != null ? $result->booking_id : -1;
+                    $result->wallet->user->image = $result->wallet->user->image != null ? $result->wallet->user->image : env('APP_URL') . ":8000/storage/photo_upload/cars/404.png";
+                    return $result;
+                });
+                return $this->success_response(data: $resultStatus);
+            }
+            return $this->success_response(data: []);
+        }
+
+
+        //
     }
 
     /**
@@ -363,7 +433,38 @@ class TransactionHistoryController extends Controller
             $request->all(),
             [
                 // 'transaction_type_id' => ['required','numeric','exists:transaction_types,id'],
-                'wallet_id' => ['required', 'numeric', 'exists:wallets,id'],
+                //'code' => ['required', 'string','exists:wallets,code'],
+                'wallet_id' => ['required','exists:wallets,id'],
+                //'description' => ['nullable'],
+
+                // 'booking_id' => ['required','numeric','exists:bookings,id'],
+                'amount' => ['required', 'numeric']
+            ]
+
+        );
+    }function rulesTransfer(Request $request)
+    {
+        return Validator::make(
+            $request->all(),
+            [
+                // 'transaction_type_id' => ['required','numeric','exists:transaction_types,id'],
+                //'code' => ['required', 'string','exists:wallets,code'],
+                'wallet_id' => ['required','exists:wallets,id'],
+                //'description' => ['nullable'],
+
+                'booking_id' => ['required','numeric','exists:bookings,id'],
+                // 'amount' => ['required', 'numeric']
+            ]
+
+        );
+    }
+    function ruleswithdraw(Request $request)
+    {
+        return Validator::make(
+            $request->all(),
+            [
+                // 'transaction_type_id' => ['required','numeric','exists:transaction_types,id'],
+                'code' => ['required', 'string','exists:wallets,code'],
                 // 'booking_id' => ['required','numeric','exists:bookings,id'],
                 'amount' => ['required', 'numeric']
             ]

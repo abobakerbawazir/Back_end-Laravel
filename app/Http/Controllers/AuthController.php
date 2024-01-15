@@ -58,28 +58,29 @@ class AuthController extends Controller
 
         //
     }
-    public function fltterUser(Request $request){
-        $username=$request->input('username');
-        $email=$request->input('email');
-        $roles=$request->input('roles');
-        $result=User::query();
+    public function fltterUser(Request $request)
+    {
+        $username = $request->input('username');
+        $email = $request->input('email');
+        $roles = $request->input('roles');
+        $result = User::query();
         //$r=Role::all();
         //$x=Role::all();
-        if($username){
-            $result->where('username','LIKE','%'.$username.'%');
+        if ($username) {
+            $result->where('username', 'LIKE', '%' . $username . '%');
         }
-        if($email){
-            $result->where('email','LIKE','%'. $email .'%');
+        if ($email) {
+            $result->where('email', 'LIKE', '%' . $email . '%');
         }
         // if($roles){
         //     $result->where('roles','LIKE','%'. $roles .'%');
         // }
-        $filteredResult=$result->get();
+        $filteredResult = $result->get();
         return $this->success_response(data: UserResource::collection($filteredResult));
     }
     public function viewAllBranchActive()
     {
-         $result = User::role('branch')->where('active', '=', 1)->get();
+        $result = User::role('branch')->where('active', '=', 1)->get();
         // $result = User::whereDoesntHave('roles',function($query){
         //     $query->where('name','admin');
         // })->get();
@@ -87,12 +88,12 @@ class AuthController extends Controller
     }
     public function viewAlluserDoesNotAdmin()
     {
-        $result = User::whereDoesntHave('roles',function($query){
-            $query->where('name','admin');
+        $result = User::whereDoesntHave('roles', function ($query) {
+            $query->where('name', 'admin');
         })->get();
         return $this->success_response(data: UserResource::collection($result));
     }
-    public function viewAlluserByRoleName(String $name,int $id)
+    public function viewAlluserByRoleName(String $name, int $id)
     {
         //$result = User::role('branch')->where('active', '=', 1)->get();
         $result = User::role($name)->where('active', '=', $id)->get();
@@ -121,7 +122,7 @@ class AuthController extends Controller
 
         $result = User::find($id);
         if (!is_null($result)) {
-            return $this->success_response(data:new UserResource($result));
+            return $this->success_response(data: new UserResource($result));
         } else {
             return $this->failed_response(message: "id is not found", code: 404);
         }
@@ -207,7 +208,7 @@ class AuthController extends Controller
                 'email' => $signIn ? '' : ['required', 'email', $signIn ? '' : 'unique:users,email'],
                 'phone' => $signIn ? '' : 'required|unique:users,phone|numeric|digits:9',
                 'password' => $signIn ? '' : ['required', $signIn ? '' : 'confirmed', 'min:8'],
-               
+
             ]
 
         );
@@ -231,10 +232,37 @@ class AuthController extends Controller
 
         $user->token = $user->createToken('api_token')->plainTextToken;
         $user->wallet;
-        
+
         //$user->role = $user->roles()->first()->name;
-        return $this->success_response(data:new ProfileResourse($user));
+        return $this->success_response(data: new ProfileResourse($user));
     }
+    public function addUserAndAddImage(Request $request)
+    {
+        $validate = $this->rules($request);
+        if ($validate->fails()) {
+            return $this->failed_response(data: $validate->errors());
+        }
+        $request['password'] = bcrypt($request['password']);
+        $request['active'] = false;
+        if ($request->has('image_path')) {
+            $image = $request->file('image_path');
+            $image_name = time() . '_image.' . $image->getClientOriginalExtension();
+            $path = 'public/photo_upload/usersSignUp';
+            $stored_path = $image->storeAs($path, $image_name);
+            $request['image'] = $stored_path;
+            // $resualimage = User::create(['image'=>$stored_path]);
+            $user = User::create($request->all());
+            // return ($user);
+            $user->assignRole($request->role);
+            $user->role = $user->roles()->first()->name;
+            $code = $this->uniqueGenerateCode();
+            $wallet = Wallet::create(['code' => $code, 'balance' => 0, 'user_id' => $user->id]);
+            // return $this->success_response(data:$wallet);
+            return $this->success_response(data: [$user, $wallet]);
+            // return $this->success_response(data: $result);
+        }
+    }
+
 
     function signup(Request $request)
     {
@@ -248,17 +276,18 @@ class AuthController extends Controller
         $user = User::create($request->all());
         $user->assignRole($request->role);
         $user->role = $user->roles()->first()->name;
-        $code=$this->uniqueGenerateCode();
-        $wallet=Wallet::create(['code'=>$code,'balance'=>0,'user_id'=>$user->id]);
+        $code = $this->uniqueGenerateCode();
+        $wallet = Wallet::create(['code' => $code, 'balance' => 0, 'user_id' => $user->id]);
         // return $this->success_response(data:$wallet);
-        return $this->success_response(data: [$user,$wallet]);
+        return $this->success_response(data: [$user, $wallet]);
     }
-    public function uniqueGenerateCode(){
-        $code=Str::random(15);
-        while(Wallet::where('code',$code)->exists()){
-            $code=Str::random(15);
+    public function uniqueGenerateCode()
+    {
+        $code = Str::random(15);
+        while (Wallet::where('code', $code)->exists()) {
+            $code = Str::random(15);
         }
-        return$code;
+        return $code;
     }
 
     function logout()

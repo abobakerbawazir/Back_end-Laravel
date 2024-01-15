@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Transaction_history extends Model
 {
     use HasFactory,SoftDeletes;
-    protected $fillable=['transaction_type_id','wallet_id','booking_id','amount','description'];
+    protected $fillable=['transaction_type_id','wallet_id','booking_id','amount','description','status'];
     /**
      * Get the transactionType that owns the Transaction_history
      *

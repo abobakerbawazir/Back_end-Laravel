@@ -31,6 +31,8 @@ Route::post('uploadImage', [PrandController::class, 'uploadImage'])->name('uploa
 Route::get('retImage', [PrandController::class, 'retImage'])->name('retImage');
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('signup', [AuthController::class, 'signup'])->name('signup');
+Route::post('addUserAndAddImage', [AuthController::class, 'addUserAndAddImage'])->name('addUserAndAddImage');
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
@@ -69,6 +71,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // });
 });
 Route::group(["prefix" => "admin"], function () {
+    
     Route::get('fltterUser', [AuthController::class, "fltterUser"]);
     Route::get('viewAlluserByRoleName/{name}/{id}', [AuthController::class, "viewAlluserByRoleName"]);
     Route::get('viewAllBranchActive', [AuthController::class, "viewAllBranchActive"]);
@@ -152,8 +155,15 @@ Route::group(["prefix" => 'transaction_history'], function () {
     Route::get('getInfoAllTransactionHistoryDiposit', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryDiposit']);
     Route::get('getonlyTransactionHistoryDipositWithStatusFalse', [TransactionHistoryController::class, 'getonlyTransactionHistoryDipositWithStatusFalse']);
     Route::get('updateDiposit/{id}', [TransactionHistoryController::class, 'updateDiposit']);
+    Route::get('getInfoAllTransactionHistoryforCustomer/{id}/{walletId}', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryforCustomer']);
     Route::get('getConutTransactionHistory/{id}', [TransactionHistoryController::class, 'getConutTransactionHistory']);
     Route::get('getConutTransactionHistoryDipositStateFalse', [TransactionHistoryController::class, 'getConutTransactionHistoryDipositStateFalse']);
+    Route::get('getCustomerTransactionHistoryToTransfer/{id}', [TransactionHistoryController::class, 'getCustomerTransactionHistoryToTransfer']);
+    Route::get('getBranchInfoAllTransactionHistoryToTransfer/{branch_id}', [TransactionHistoryController::class, 'getBranchInfoAllTransactionHistoryToTransfer']);
+
+    
+
+    
 
     
 
@@ -164,3 +174,9 @@ Route::group(["prefix" => 'transaction_history'], function () {
 
     
 });
+// Route::post('/upload_image1',function(Request $req){
+//     $imageName = time().'.'.request()->file->getClientOriginalExtension();
+//     request()->file->move(public_path('image/upload'), $imageName);
+//     $path = "/image/upload".$imageName;
+//     return response()->json($path);
+// });

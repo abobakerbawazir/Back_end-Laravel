@@ -46,7 +46,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Booking::class);
     }
-    function getUrlAttribute() {
+    // function getUrlAttribute() {
+    //     return env('APP_URL').':8000/storage/'.substr($this->attributes['image'],7);
+    // }
+    function getImageAttribute() {
         return env('APP_URL').':8000/storage/'.substr($this->attributes['image'],7);
     }
     /**

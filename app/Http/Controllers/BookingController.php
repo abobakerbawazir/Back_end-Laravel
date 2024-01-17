@@ -44,19 +44,19 @@ class BookingController extends Controller
     {
         $booking = Booking::with('cars.users')->with('cars.image_car_brands')->with('user')->where('user_id', $customer_id)->whereHas('cars', function ($query) use ($branch_id) {
             $query->where('cars.user_id', $branch_id);
-        })->orderBy('id','desc')->get();
+        })->orderBy('id', 'desc')->get();
         return response()->json($booking, 200);
     }
     public function getAllInformationBookingForAllCustomer()
     {
-        $booking = Booking::with('cars.users')->with('cars.image_car_brands')->with('user')->orderBy('id','desc')->get();
+        $booking = Booking::with('cars.users')->with('cars.image_car_brands')->with('user')->orderBy('id', 'desc')->get();
         //$booking = Booking::find(294)->with('cars.users')->with('cars.image_car_brands')->with('user')->first();
 
         return response()->json($booking, 200);
     }
     public function getAllInformationBookingForOnlyCustomer(int $user_id)
     {
-        $booking = Booking::where('user_id', $user_id)->with('cars.users')->with('cars.image_car_brands')->with('user')->orderBy('id','desc')->get();
+        $booking = Booking::where('user_id', $user_id)->with('cars.users')->with('cars.image_car_brands')->with('user')->orderBy('id', 'desc')->get();
         // foreach($booking as $booking){
         //     $booking->user->image =  $booking->user->image ?? "http://192.168.179.98:8000/storage/photo_upload/users/100.png";
 
@@ -66,7 +66,7 @@ class BookingController extends Controller
     public function getByIDInformationBookingForAllCustomer(int $id)
     {
         $booking = Booking::where('id', $id)->with('cars.users')->with('cars.image_car_brands')->with('user')->first();
-       // $booking->user->image =  ($booking->user->image != "http://192.168.179.98:8000/storage/") ? $booking->user->image : "8000///photo_upload/users/100.png";
+        // $booking->user->image =  ($booking->user->image != "http://192.168.179.98:8000/storage/") ? $booking->user->image : "8000///photo_upload/users/100.png";
         // $result = [
         //     'booking' => $booking,
         //     'cars' =>  ,
@@ -302,21 +302,29 @@ class BookingController extends Controller
         $obj = Booking::find($id);
         if (!is_null($obj)) {
             $car = Car::findOrFail($obj->car_id);
-            if ($request->status == 'مؤكد') {
-                if ($obj->payment_status != 'عبر المحفظة') {
-                    $obj->updatePaymentStatus('عند الاستلام');
+            if ($obj->status == 'مكتمل') {
+                return $this->success_response(data: "الحجز أكتمل لايمكن تغير حالته",code:202);
+            } else {
+                if ($obj->status == 'مؤكد' && ($request->status == 'معلق' || $request->status == 'ملغى' || $request->status == 'مرفوض')) {
+                    return $this->success_response(data: "لايمكنك تعديل حالة الحجز لان الحجز قد تم تأكيده الرجاء اجعل الحجز مكتمل",code:205);
+                } else {
+                    if ($request->status == 'مؤكد') {
+                        if ($obj->payment_status != 'عبر المحفظة') {
+                            $obj->updatePaymentStatus('عند الاستلام');
+                        }
+                        $car->active = true;
+                    } elseif ($request->status == 'مكتمل') {
+                        $car->active = false;
+                    }
+                    $car->save();
+                    //$car->update(["active"=>$car->active]);
+                    // $idcar=$car->id;
+                    $result = tap($obj)->update([$obj->status = $request->status]);
+                    return $this->success_response(data: [$result, $car,]);
                 }
-                $car->active = true;
-            } elseif ($request->status == 'مكتمل') {
-                $car->active = false;
             }
-            $car->save();
-            //$car->update(["active"=>$car->active]);
-            // $idcar=$car->id;
-            $result = tap($obj)->update([$obj->status = $request->status]);
-            return $this->success_response(data: [$result, $car,]);
         } else {
-            return $this->failed_response(code: 400,);
+            return $this->failed_response(code: 404,);
         }
         //
     }

@@ -87,6 +87,20 @@ class AuthController extends Controller
         // })->get();
         return $this->success_response(data: UserResource::collection($result));
     }
+    public function viewAllBranchActiveSearch(Request $request)
+    {
+        $full_name = $request->input('full_name');
+       // $email = $request->input('email');
+        $result = User::role('branch')->where('active', '=', 1);
+        if ($full_name) {
+            $result->where('full_name', 'LIKE', '%' . $full_name . '%');
+        }
+        // if ($email) {
+        //     $result->where('email', 'LIKE', '%' . $email . '%');
+        // }
+        $filteredResult = $result->get();
+        return $this->success_response(data: UserResource::collection($filteredResult));
+    }
     public function viewAlluserDoesNotAdmin()
     {
         $result = User::whereDoesntHave('roles', function ($query) {

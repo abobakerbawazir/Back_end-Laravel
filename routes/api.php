@@ -10,6 +10,7 @@ use App\Http\Controllers\TransactionTypeController;
 use App\Http\Controllers\WalletController;
 use App\Models\Prand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,7 +27,8 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-
+Route::get('/linkstorage',function(){Artisan::call('storage:link');});
+Route::get('/routecache',function(){Artisan::call('route:cache');});
 Route::post('uploadImage', [PrandController::class, 'uploadImage'])->name('uploadImage');
 Route::get('retImage', [PrandController::class, 'retImage'])->name('retImage');
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -40,6 +42,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::group(["prefix" => "booking"], function () {
         Route::post('bookingCarsByUser_id_and_car_id_select_only_date_from_to/{userId}/{carId}', [BookingController::class, 'bookingCarsByUser_id_and_car_id_select_only_date_from_to']);
     });
+    ///////
+    Route::group(["prefix" => "transaction_history"], function () {
+        Route::post('transfer', [TransactionHistoryController::class, 'transfer']);
+        Route::post('diposit', [TransactionHistoryController::class, 'diposit']);
+        Route::post('withdraw', [TransactionHistoryController::class, 'withdraw']);
+    });
+
     ///////////////////////////////////////////////////
     // Route::group(["prefix" => "admin"], function () {
 
@@ -71,8 +80,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // });
 });
 Route::group(["prefix" => "admin"], function () {
-    
+
     Route::post('updateImageUser/{id}', [AuthController::class, "updateImageUser"]);
+
+    Route::get('viewAllBranchActiveSearch', [AuthController::class, "viewAllBranchActiveSearch"]);
 
     Route::get('fltterUser', [AuthController::class, "fltterUser"]);
     Route::get('viewAlluserByRoleName/{name}/{id}', [AuthController::class, "viewAlluserByRoleName"]);
@@ -145,9 +156,9 @@ Route::group(["prefix" => 'transaction_type'], function () {
 Route::group(["prefix" => 'transaction_history'], function () {
     Route::post('store', [TransactionHistoryController::class, 'store']);
     Route::get('index', [TransactionHistoryController::class, 'index']);
-    Route::post('transfer', [TransactionHistoryController::class, 'transfer']);
-    Route::post('diposit', [TransactionHistoryController::class, 'diposit']);
-    Route::post('withdraw', [TransactionHistoryController::class, 'withdraw']);
+    // Route::post('transfer', [TransactionHistoryController::class, 'transfer']);
+    // Route::post('diposit', [TransactionHistoryController::class, 'diposit']);
+    // Route::post('withdraw', [TransactionHistoryController::class, 'withdraw']);
     Route::get('getBranchIdBooking/{id}', [TransactionHistoryController::class, 'getBranchIdBooking']);
     Route::get('getInfoOneTransactionHistoryToTransfer/{id}', [TransactionHistoryController::class, 'getInfoOneTransactionHistoryToTransfer']);
     Route::get('getInfoAllTransactionHistoryToTransfer', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryToTransfer']);
@@ -161,19 +172,6 @@ Route::group(["prefix" => 'transaction_history'], function () {
     Route::get('getConutTransactionHistoryDipositStateFalse', [TransactionHistoryController::class, 'getConutTransactionHistoryDipositStateFalse']);
     Route::get('getCustomerTransactionHistoryToTransfer/{id}', [TransactionHistoryController::class, 'getCustomerTransactionHistoryToTransfer']);
     Route::get('getBranchInfoAllTransactionHistoryToTransfer/{branch_id}', [TransactionHistoryController::class, 'getBranchInfoAllTransactionHistoryToTransfer']);
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
 });
 // Route::post('/upload_image1',function(Request $req){
 //     $imageName = time().'.'.request()->file->getClientOriginalExtension();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\PrandResource;
+use App\Models\Car;
 use App\Models\Prand;
 use App\Models\Transaction_type;
 use App\Traits\ApiResponse;
@@ -37,7 +38,7 @@ class PrandController extends Controller
         if ($validation->fails()) {
             return $this->failed_response(data: $validation->errors());
         }
-        $result = Transaction_type::create($request->all());
+        $result = Prand::create($request->all());
         return $this->success_response(data: $result);
         //
     }
@@ -71,16 +72,20 @@ class PrandController extends Controller
      */
     public function destroy(int $id)
     {
-        $obj = Prand::find($id);
-        if (!is_null($obj)) {
-            $result = $obj->delete();
-            if (!is_null($result)) {
-                return $this->success_response($result);
+        $car = Car::where('prand_id', $id)->first();
+        if (is_null($car)) {
+            $obj = Prand::find($id);
+            if (!is_null($obj)) {
+                $result = $obj->delete();
+                if (!is_null($result)) {
+                    return $this->success_response($result);
+                }
+            } else {
+                return $this->failed_response(message: "الماركة غير موجودة", code: 404);
             }
         } else {
-            return $this->failed_response(message: "id is not found", code: 404);
+            return $this->failed_response(message: "لايمكنك حذفك الماركة ومازال هناك سيارات مرتبطة بها", code: 405);
         }
-        //
     }
     function uploadImage(Request $request)
     {
@@ -98,21 +103,22 @@ class PrandController extends Controller
             return $this->success_response(data: $result);
         }
     }
-    public function filtterPrandName(Request $request){
-        $name=$request->input('name');
-      
-        $result=Prand::query();
-     
-        if($name){
-            $result->where('name','LIKE','%'.$name.'%');
+    public function filtterPrandName(Request $request)
+    {
+        $name = $request->input('name');
+
+        $result = Prand::query();
+
+        if ($name) {
+            $result->where('name', 'LIKE', '%' . $name . '%');
         }
-        $filteredResult=$result->get();
+        $filteredResult = $result->get();
         return $this->success_response(data: PrandResource::collection($filteredResult));
     }
     function getPrandName(Request $request)
     {
-        $name=$request->input('name');
-        $namePrand=Prand::where('name','=',$name)->get();
+        $name = $request->input('name');
+        $namePrand = Prand::where('name', '=', $name)->get();
         return $this->success_response(data: $namePrand);
 
         // $result = Image_car_brand::with('cars')->get();
@@ -131,7 +137,6 @@ class PrandController extends Controller
 
         $result = Prand::find($id);
         return $this->success_response(data: $result);
-
     }
     function rules(Request $request)
     {

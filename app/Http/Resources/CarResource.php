@@ -14,6 +14,6 @@ class CarResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return array_merge(parent::toArray($request), ['image_car_of_brands' => $this->image_car_brands->first()->url ?? "http://192.168.179.98:8000/storage/photo_upload/cars/112.png"]);
+        return array_merge(parent::toArray($request), ['image_car_of_brands' => $this->image_car_brands->first()->url ?? env('APP_URL') . '/storage/' . "photo_upload/cars/112.png"]);
     }
 }

@@ -72,6 +72,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 Route::group(["prefix" => "admin"], function () {
     
+    Route::post('updateImageUser/{id}', [AuthController::class, "updateImageUser"]);
+
     Route::get('fltterUser', [AuthController::class, "fltterUser"]);
     Route::get('viewAlluserByRoleName/{name}/{id}', [AuthController::class, "viewAlluserByRoleName"]);
     Route::get('viewAllBranchActive', [AuthController::class, "viewAllBranchActive"]);
@@ -119,7 +121,6 @@ Route::group(["prefix" => "booking"], function () {
     Route::get('getByIDInformationBookingForAllCustomer/{id}', [BookingController::class, 'getByIDInformationBookingForAllCustomer']);
     Route::post('store', [BookingController::class, 'store']);
     Route::get('index', [BookingController::class, 'index']);
-    Route::get('show/{id}', [BookingController::class, 'show']);
     Route::put('update/{id}', [BookingController::class, 'update']);
     Route::put('updateBookingStateByBranch/{id}', [BookingController::class, 'updateBookingStateByBranch']);
     Route::delete('delete/{id}', [BookingController::class, 'destroy']);

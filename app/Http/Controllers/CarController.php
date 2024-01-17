@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\CarResource;
+use App\Models\Booking;
 use App\Models\Car;
 use App\Models\Image_car_brand;
 use App\Traits\ApiResponse;
@@ -109,15 +110,29 @@ class CarController extends Controller
      */
     public function destroy(int $id)
     {
-        $obj = Car::find($id);
-        if (!is_null($obj)) {
-            $result = $obj->delete();
-            if (!is_null($result)) {
-                return $this->success_response($result);
+        $booking = Booking::where('car_id', $id)->first();
+        if (is_null($booking)) {
+            $obj = Car::find($id);
+            if (!is_null($obj)) {
+                $result = $obj->delete();
+                if (!is_null($result)) {
+                    return $this->success_response($result);
+                }
+            } else {
+                return $this->failed_response(message: "السيارة غير موجودة", code: 404);
             }
         } else {
-            return $this->failed_response(message: "id is not found", code: 404);
+            return $this->failed_response(message: "لايمكنك حذفك السيارة ومازال هناك حجوزات مرتبطة بها", code: 405);
         }
+        // $obj = Car::find($id);
+        // if (!is_null($obj)) {
+        //     $result = $obj->delete();
+        //     if (!is_null($result)) {
+        //         return $this->success_response($result);
+        //     }
+        // } else {
+        //     return $this->failed_response(message: "id is not found", code: 404);
+        // }
         //
     }
 

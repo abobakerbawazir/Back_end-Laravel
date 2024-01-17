@@ -51,7 +51,7 @@ class User extends Authenticatable
     // }
     function getImageAttribute()
     {
-        return env('APP_URL') . ':8000/storage/' . substr($this->attributes['image'],   7);
+        return env('APP_URL') . '/storage/' . substr($this->attributes['image'],   7);
     }
     /**
      * Get the wallets that owns the User

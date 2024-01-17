@@ -14,6 +14,6 @@ class ProfileResourse extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return array_merge(parent::toArray($request), ['roles' => $this->roles->first()->name, 'image' => $this->image =='http://192.168.179.98:8000/storage/' ? "http://192.168.179.98:8000/storage/photo_upload/cars/404.png":$this->image]);
+        return array_merge(parent::toArray($request), ['roles' => $this->roles->first()->name, 'image' => $this->image ==  env('APP_URL') . '/storage/'  ? env('APP_URL') . '/storage/' .  "photo_upload/users/404.png" : $this->image]);
     }
 }

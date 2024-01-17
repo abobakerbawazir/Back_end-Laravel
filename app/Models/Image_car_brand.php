@@ -22,6 +22,6 @@ class Image_car_brand extends Model
         return $this->belongsTo(Car::class, 'car_id', 'id');
     }
     function getUrlAttribute() {
-        return env('APP_URL').':8000/storage/'.substr($this->attributes['url'],7);
+        return env('APP_URL').'/storage/'.substr($this->attributes['url'],7);
     }
 }

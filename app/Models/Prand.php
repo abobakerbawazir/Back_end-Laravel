@@ -12,6 +12,6 @@ class Prand extends Model
     protected $fillable = ['name','path'];
 
     function getPathAttribute() {
-        return env('APP_URL').':8000/storage/'.substr($this->attributes['path'],7);
+        return env('APP_URL').'/storage/'.substr($this->attributes['path'],7);
     }
 }

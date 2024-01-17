@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
@@ -246,7 +247,7 @@ class AuthController extends Controller
         if ($request->has('image_path')) {
             $image = $request->file('image_path');
             $image_name = time() . '_image.' . $image->getClientOriginalExtension();
-            $path = 'public/photo_upload/users';
+            $path = 'public/photo_upload/userImage';
             $stored_path = $image->storeAs($path, $image_name);
             $request['image'] = $stored_path;
             $user = User::create($request->all());
@@ -255,11 +256,60 @@ class AuthController extends Controller
             $code = $this->uniqueGenerateCode();
             $wallet = Wallet::create(['code' => $code, 'balance' => 0, 'user_id' => $user->id]);
             // return $this->success_response(data:$wallet);
-            return $this->success_response(data:$user);
+            return $this->success_response(data: $user);
             // return $this->success_response(data: $result);
         }
     }
+    public function updateImageUser(int $id, Request $request)
+    {
+        $validate = $this->rulesupdateImageUser($request);
+        if ($validate->fails()) {
+            return $this->failed_response(data: $validate->errors());
+        }
+        if ($request->has('image_path')) {
+            $image = $request->file('image_path');
+            $image_name = time() . '_image.' . $image->getClientOriginalExtension();
+            $path = 'public/photo_upload/userImage';
+            $final_path = $image->storeAs($path, $image_name);
+            $user = User::find($id);
+            // if ($user->image == "http://192.168.129.98:8000/storage/photo_upload/users/404.png")
+                if ($user->image == (env('APP_URL') . '/storage/' ."photo_upload/users/404.png"))
+                 {
+            $path = 'public/photo_upload/userImage';
+            $stored_path = $image->storeAs($path, $image_name);
+            $request['image'] = $stored_path;
+            $user->image =$final_path;
+            $user->save();}
+                // $oldImage = $user->image;
+                // if ($oldImage) {
+                //     Storage::disk('public')->delete($path . $oldImage);
+                // }
+                
+             else {
+                // $oldImage=$user->image;
+                unlink(storage_path() . '/app/public/' . explode('storage/', $user->image)[1]);
+                $user->image = $final_path;
+                // if($oldImage){
+                // Storage::disk('public')->delete($path . $oldImage);
+                // }
+            }
+                $user->save();
 
+                return $this->success_response(data: $user);
+            
+        }
+    }
+    function rulesupdateImageUser(Request $request)
+    {
+        return Validator::make(
+            $request->all(),
+            [
+                'image_path' => 'required|image|mimes:png,jpg,jpeg,gif,svg'
+
+            ]
+
+        );
+    }
 
     function signup(Request $request)
     {

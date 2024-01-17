@@ -44,19 +44,19 @@ class BookingController extends Controller
     {
         $booking = Booking::with('cars.users')->with('cars.image_car_brands')->with('user')->where('user_id', $customer_id)->whereHas('cars', function ($query) use ($branch_id) {
             $query->where('cars.user_id', $branch_id);
-        })->get();
+        })->orderBy('id','desc')->get();
         return response()->json($booking, 200);
     }
     public function getAllInformationBookingForAllCustomer()
     {
-        $booking = Booking::with('cars.users')->with('cars.image_car_brands')->with('user')->get();
+        $booking = Booking::with('cars.users')->with('cars.image_car_brands')->with('user')->orderBy('id','desc')->get();
         //$booking = Booking::find(294)->with('cars.users')->with('cars.image_car_brands')->with('user')->first();
 
         return response()->json($booking, 200);
     }
     public function getAllInformationBookingForOnlyCustomer(int $user_id)
     {
-        $booking = Booking::where('user_id', $user_id)->with('cars.users')->with('cars.image_car_brands')->with('user')->get();
+        $booking = Booking::where('user_id', $user_id)->with('cars.users')->with('cars.image_car_brands')->with('user')->orderBy('id','desc')->get();
         // foreach($booking as $booking){
         //     $booking->user->image =  $booking->user->image ?? "http://192.168.179.98:8000/storage/photo_upload/users/100.png";
 

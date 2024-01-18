@@ -137,18 +137,7 @@ class BookingController extends Controller
                 return response()->json(['Message' => 'User is already booking in the cars']);
             }
             $booking = Booking::create(['car_id' => $car->id, 'user_id' => $user->id, 'from' => $request->from, 'to' => $request->to, 'total' => $request->total]);
-            // $bookingData = $request->input('from');
-            // $bookingData = $request->input('to');
-            // $bookingData = $request->input('total');
-            //$booking = new Booking();
-            // $booking->from = $bookingData['from'];
-            // $booking->to = $bookingData['to'];
-            // $booking->total = $bookingData['total'];
-            // $booking->total = $bookingData['user_id'];
-            // $booking->total = $bookingData['car_id'];
-            // $booking->user_id = $user->id;
-            // $booking->car_id = $car->id;
-            //$booking->save();
+
             return response()->json(['Message' => 'User Booking Successfully']);
         } else {
             return response()->json(['Message' => 'Cannot Booking in an intactive cars'], 403);
@@ -158,6 +147,9 @@ class BookingController extends Controller
 
     public function bookingCarsByUser_id_and_car_id_select_only_date_from_to(Request $request, int $userId, int $carId)
     {
+        if (!Auth::user()->hasRole('customer')) {
+            return response()->json(['message' => 'غير مسموح لك الوصول'], 403);
+        }
         if (($request->to == null && $request->from == null) || ($request->to == 'null' && $request->from == 'null')) {
             return response()->json(['data' => 'لا يمكن ان لا تدخل تاريخ ليداية و لنهاية للحجز', "type" => 'خطا'], status: 209);
         } elseif (($request->from == null) || ($request->from == 'null')) {
@@ -295,6 +287,9 @@ class BookingController extends Controller
     }
     public function updateBookingStateByBranch(Request $request, int $id)
     {
+        if (!Auth::user()->hasRole('branch')) {
+            return response()->json(['message' => 'غير مسموح لك الوصول'], 403);
+        }
         $validation = $this->rulesstatus($request);
         if ($validation->fails()) {
             return $this->failed_response(data: $validation->errors(), code: 400);
@@ -303,10 +298,10 @@ class BookingController extends Controller
         if (!is_null($obj)) {
             $car = Car::findOrFail($obj->car_id);
             if ($obj->status == 'مكتمل') {
-                return $this->success_response(data: "الحجز أكتمل لايمكن تغير حالته",code:202);
+                return $this->success_response(data: "الحجز أكتمل لايمكن تغير حالته", code: 202);
             } else {
                 if ($obj->status == 'مؤكد' && ($request->status == 'معلق' || $request->status == 'ملغى' || $request->status == 'مرفوض')) {
-                    return $this->success_response(data: "لايمكنك تعديل حالة الحجز لان الحجز قد تم تأكيده الرجاء اجعل الحجز مكتمل",code:205);
+                    return $this->success_response(data: "لايمكنك تعديل حالة الحجز لان الحجز قد تم تأكيده الرجاء اجعل الحجز مكتمل", code: 205);
                 } else {
                     if ($request->status == 'مؤكد') {
                         if ($obj->payment_status != 'عبر المحفظة') {

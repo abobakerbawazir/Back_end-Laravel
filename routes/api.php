@@ -27,8 +27,12 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-Route::get('/linkstorage',function(){Artisan::call('storage:link');});
-Route::get('/routecache',function(){Artisan::call('route:cache');});
+Route::get('/linkstorage', function () {
+    Artisan::call('storage:link');
+});
+Route::get('/routecache', function () {
+    Artisan::call('route:cache');
+});
 Route::post('uploadImage', [PrandController::class, 'uploadImage'])->name('uploadImage');
 Route::get('retImage', [PrandController::class, 'retImage'])->name('retImage');
 Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -41,44 +45,28 @@ Route::middleware(['auth:sanctum'])->group(function () {
     ///////////////////////////////////////////////
     Route::group(["prefix" => "booking"], function () {
         Route::post('bookingCarsByUser_id_and_car_id_select_only_date_from_to/{userId}/{carId}', [BookingController::class, 'bookingCarsByUser_id_and_car_id_select_only_date_from_to']);
+        Route::put('updateBookingStateByBranch/{id}', [BookingController::class, 'updateBookingStateByBranch']);
     });
     ///////
     Route::group(["prefix" => "transaction_history"], function () {
         Route::post('transfer', [TransactionHistoryController::class, 'transfer']);
         Route::post('diposit', [TransactionHistoryController::class, 'diposit']);
         Route::post('withdraw', [TransactionHistoryController::class, 'withdraw']);
+        Route::get('updateDiposit/{id}', [TransactionHistoryController::class, 'updateDiposit']);
+    });
+    //////////
+    Route::group(["prefix" => "admin"], function () {
+        Route::get('index', [AuthController::class, "index"]);
+        Route::delete('delete/{id}', [AuthController::class, "destroy"]);
     });
 
-    ///////////////////////////////////////////////////
-    // Route::group(["prefix" => "admin"], function () {
-
-    //     Route::get('viewAllBranchActive', [AuthController::class, "viewAllBranchActive"]);
-    //     Route::get('index', [AuthController::class, "index"]);
-    //     Route::delete('delete/{id}', [AuthController::class, "destroy"]);
-    //     Route::post('store', [AuthController::class, "store"]);
-    //     Route::get('show/{id}', [AuthController::class, "show"]);
-    //     Route::get('showBranch/{roles}', [AuthController::class, "showBranch"]);
-
-    //     Route::put('update/{id}', [AuthController::class, "update"]);
-    // });
-    /////////////////////////////////////////////////////////
-    // Route::group(["prefix" => "car"], function () {
-    //     Route::post('addCarAndImage', [CarController::class, 'addCarAndImage']);
-    //     Route::post('store', [CarController::class, 'store']);
-    //     Route::get('index', [CarController::class, 'index']);
-    //     Route::put('update/{id}', [CarController::class, "update"]);
-
-    //     Route::get('getCarWithUserAndPrand', [CarController::class, 'getCarWithUserAndPrand']);
-    // });
-    /////////////////////////////////////////////////////////////
-    // Route::group(["prefix" => "image"], function () {
-
-    //     Route::get('getImageId', [ImageCarBrandController::class, 'getImageId']);
-    //     Route::post('uploadImage', [ImageCarBrandController::class, 'uploadImage']);
-    //     Route::get('retImage', [ImageCarBrandController::class, 'retImage']);
-    //     Route::delete('delete/{id}', [ImageCarBrandController::class, "destroy"]);
-    // });
+    /////////
+    Route::group(["prefix" => "car"], function () {
+        Route::post('store', [CarController::class, 'store']);
+        Route::delete('delete/{id}', [CarController::class, "destroy"]);
+    });
 });
+
 Route::group(["prefix" => "admin"], function () {
 
     Route::post('updateImageUser/{id}', [AuthController::class, "updateImageUser"]);
@@ -89,8 +77,8 @@ Route::group(["prefix" => "admin"], function () {
     Route::get('viewAlluserByRoleName/{name}/{id}', [AuthController::class, "viewAlluserByRoleName"]);
     Route::get('viewAllBranchActive', [AuthController::class, "viewAllBranchActive"]);
     Route::get('viewAlluserDoesNotAdmin', [AuthController::class, "viewAlluserDoesNotAdmin"]);
-    Route::get('index', [AuthController::class, "index"]);
-    Route::delete('delete/{id}', [AuthController::class, "destroy"]);
+    // Route::get('index', [AuthController::class, "index"]);
+    // Route::delete('delete/{id}', [AuthController::class, "destroy"]);
     Route::post('store', [AuthController::class, "store"]);
     Route::get('show/{id}', [AuthController::class, "show"]);
     Route::get('showBranch/{roles}', [AuthController::class, "showBranch"]);
@@ -111,10 +99,10 @@ Route::group(["prefix" => "prand"], function () {
 });
 Route::group(["prefix" => "car"], function () {
     Route::post('addCarAndImage', [CarController::class, 'addCarAndImage']);
-    Route::post('store', [CarController::class, 'store']);
+    //Route::post('store', [CarController::class, 'store']);
     Route::get('index', [CarController::class, 'index']);
     Route::put('update/{id}', [CarController::class, "update"]);
-    Route::delete('delete/{id}', [CarController::class, "destroy"]);
+    //Route::delete('delete/{id}', [CarController::class, "destroy"]);
     Route::get('show/{id}', [CarController::class, "show"]);
     Route::get('getCarWithUserAndPrand', [CarController::class, 'getCarWithUserAndPrand']);
 });
@@ -133,7 +121,6 @@ Route::group(["prefix" => "booking"], function () {
     Route::post('store', [BookingController::class, 'store']);
     Route::get('index', [BookingController::class, 'index']);
     Route::put('update/{id}', [BookingController::class, 'update']);
-    Route::put('updateBookingStateByBranch/{id}', [BookingController::class, 'updateBookingStateByBranch']);
     Route::delete('delete/{id}', [BookingController::class, 'destroy']);
     Route::get('bookingwithcaranduserbyId/{user_id}/{car_id}', [BookingController::class, 'bookingwithcaranduserbyId']);
     Route::get('convertdays', [BookingController::class, 'convertdays']);
@@ -166,7 +153,7 @@ Route::group(["prefix" => 'transaction_history'], function () {
     Route::get('getInfoAllTransactionHistoryNotTransfer/{id}', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryNotTransfer']);
     Route::get('getInfoAllTransactionHistoryDiposit', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryDiposit']);
     Route::get('getonlyTransactionHistoryDipositWithStatusFalse', [TransactionHistoryController::class, 'getonlyTransactionHistoryDipositWithStatusFalse']);
-    Route::get('updateDiposit/{id}', [TransactionHistoryController::class, 'updateDiposit']);
+    // Route::get('updateDiposit/{id}', [TransactionHistoryController::class, 'updateDiposit']);
     Route::get('getInfoAllTransactionHistoryforCustomer/{id}/{walletId}', [TransactionHistoryController::class, 'getInfoAllTransactionHistoryforCustomer']);
     Route::get('getConutTransactionHistory/{id}', [TransactionHistoryController::class, 'getConutTransactionHistory']);
     Route::get('getConutTransactionHistoryDipositStateFalse', [TransactionHistoryController::class, 'getConutTransactionHistoryDipositStateFalse']);

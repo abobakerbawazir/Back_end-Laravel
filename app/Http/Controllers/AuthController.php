@@ -15,11 +15,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
-
+use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Models\Permission;
 
 class AuthController extends Controller
 {
     use ApiResponse;
+    use HasRoles;
 
     /**
      * Display a listing of the resource.
@@ -27,37 +29,14 @@ class AuthController extends Controller
     // public function index(){}
     public function index()
     {
-        // Booking::with('user')->whereHas('cars',function($query){ $query->where('cars.user_id',1);})->get()
-        // $users=User::with('bookings.cars')->get();
-        // return response()->json($users);
-
-        // $users=User::with(['bookings'=>function($query){
-        //     $query->select('user_id','from');
-        // },'bookings.cars'=>function($query){
-        //     $query->select('name');
-        // }])->get();
-        //return response()->json($users);
-
-        // $users=User::with(['bookings.cars'=>function($query){
-        //     $query->select('name');
-        // }])->get();
-        //  return response()->json($users);
-
+        // if (!Auth::user()->hasRole('admin')) {
+        //     return response()->json(['message'=>'غير مسموح لك الوصول'],403);
+        // }
+        if (!(auth()->user()->can('view_user'))) {
+            return response()->json(['message'=>'غير مسموح لك الوصول'],403);
+        }
         $result = User::with('roles')->get();
         return $this->success_response(data: UserResource::collection($result));
-        // // foreach($result as $role){
-        // //     $role->role_name=$result->roles()->first()->name;
-        // // }
-
-        // // 'roles' => $this->roles->name
-        // //return $this->success_response(data:$result);
-        // return $this->success_response(data: UserResource::collection($result));
-        // $result = User::with('bookings')->get();
-        // return $this->success_response(data: UserResource::collection($result));
-
-
-
-        //
     }
     public function fltterUser(Request $request)
     {
@@ -90,7 +69,7 @@ class AuthController extends Controller
     public function viewAllBranchActiveSearch(Request $request)
     {
         $full_name = $request->input('full_name');
-       // $email = $request->input('email');
+        // $email = $request->input('email');
         $result = User::role('branch')->where('active', '=', 1);
         if ($full_name) {
             $result->where('full_name', 'LIKE', '%' . $full_name . '%');
@@ -180,6 +159,9 @@ class AuthController extends Controller
      */
     public function destroy(int $id)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            return response()->json(['message'=>'غير مسموح لك الوصول'],403);
+        }
         $obj = User::find($id);
         if (!is_null($obj)) {
             $result = $obj->delete();
@@ -287,19 +269,19 @@ class AuthController extends Controller
             $final_path = $image->storeAs($path, $image_name);
             $user = User::find($id);
             // if ($user->image == "http://192.168.129.98:8000/storage/photo_upload/users/404.png")
-                if ($user->image == (env('APP_URL') . '/storage/' ."photo_upload/users/404.png"))
-                 {
-            $path = 'public/photo_upload/userImage';
-            $stored_path = $image->storeAs($path, $image_name);
-            $request['image'] = $stored_path;
-            $user->image =$final_path;
-            $user->save();}
-                // $oldImage = $user->image;
-                // if ($oldImage) {
-                //     Storage::disk('public')->delete($path . $oldImage);
-                // }
-                
-             else {
+            if ($user->image == (env('APP_URL') . '/storage/' . "photo_upload/users/404.png")) {
+                $path = 'public/photo_upload/userImage';
+                $stored_path = $image->storeAs($path, $image_name);
+                $request['image'] = $stored_path;
+                $user->image = $final_path;
+                $user->save();
+            }
+            // $oldImage = $user->image;
+            // if ($oldImage) {
+            //     Storage::disk('public')->delete($path . $oldImage);
+            // }
+
+            else {
                 // $oldImage=$user->image;
                 unlink(storage_path() . '/app/public/' . explode('storage/', $user->image)[1]);
                 $user->image = $final_path;
@@ -307,10 +289,9 @@ class AuthController extends Controller
                 // Storage::disk('public')->delete($path . $oldImage);
                 // }
             }
-                $user->save();
+            $user->save();
 
-                return $this->success_response(data: $user);
-            
+            return $this->success_response(data: $user);
         }
     }
     function rulesupdateImageUser(Request $request)

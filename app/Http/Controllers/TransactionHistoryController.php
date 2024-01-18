@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 use function PHPSTORM_META\map;
@@ -230,6 +231,9 @@ class TransactionHistoryController extends Controller
     }
     public function transfer(Request $request)
     {
+        if (!Auth::user()->hasRole('customer')) {
+            return response()->json(['message' => 'غير مسموح لك الوصول'], 403);
+        }
         $type = Transaction_type::find(2);
         if (!is_null($type)) {
             $validation = $this->rulesTransfer($request);
@@ -277,6 +281,9 @@ class TransactionHistoryController extends Controller
     //withdraw سحب
     public function withdraw(Request $request)
     {
+        if (!Auth::user()->hasRole('admin')) {
+            return response()->json(['message' => 'غير مسموح لك الوصول'], 403);
+        }
         $type = Transaction_type::find(1);
         if (!is_null($type)) {
             $validation = $this->ruleswithdraw($request);
@@ -298,6 +305,9 @@ class TransactionHistoryController extends Controller
     //diposit ايداع
     public function diposit(Request $request)
     {
+        if (!Auth::user()->hasRole('customer')) {
+        return response()->json(['message' => 'غير مسموح لك الوصول'], 403);
+    }
         $type = Transaction_type::find(3);
         if (!is_null($type)) {
             $validation = $this->rulesdiposit($request);
@@ -317,6 +327,9 @@ class TransactionHistoryController extends Controller
     }
     public function updateDiposit(int $id)
     {
+        if (!Auth::user()->hasRole('admin')) {
+        return response()->json(['message' => 'غير مسموح لك الوصول'], 403);
+    }
         $obj = Transaction_history::find($id);
         if (!is_null($obj)) {
             // $result = tap($obj)->update($obj->status);

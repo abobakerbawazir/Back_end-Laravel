@@ -26,7 +26,7 @@ class Transaction_history extends Model
      */
     public function wallet()
     {
-        return $this->belongsTo(wallet::class, 'wallet_id', 'id');
+        return $this->belongsTo(Wallet::class, 'wallet_id', 'id');
     }
     /**
      * Get the Booking that owns the Transaction_history

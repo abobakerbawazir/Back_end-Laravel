@@ -8,6 +8,7 @@ use App\Models\Car;
 use App\Models\Image_car_brand;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class CarController extends Controller
@@ -51,9 +52,11 @@ class CarController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-       
-        $validation = $this->rules($request);
+    {  
+        if (!Auth::user()->hasRole('branch')) {
+            return response()->json(['message' => 'غير مسموح لك الوصول'], 403);
+        }
+           $validation = $this->rules($request);
         if ($validation->fails()) {
             return $this->failed_response(data: $validation->errors());
         }
@@ -110,6 +113,9 @@ class CarController extends Controller
      */
     public function destroy(int $id)
     {
+        if (!Auth::user()->hasRole('branch')) {
+            return response()->json(['message' => 'غير مسموح لك الوصول'], 403);
+        }
         $booking = Booking::where('car_id', $id)->first();
         if (is_null($booking)) {
             $obj = Car::find($id);
@@ -137,6 +143,9 @@ class CarController extends Controller
     }
 
    public function addCarAndImage(Request $request){
+    // if (!Auth::user()->hasRole('branch')) {
+    //     return response()->json(['message' => 'غير مسموح لك الوصول'], 403);
+    // }
     $result = Car::create($request->all());
         // return $this->success_response(data: $result);
     if ($request->has('image_car_of_brands')) {
